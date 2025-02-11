@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  UNVERIFIED
+  VERIFIED
+  ADMIN
+}
+
+model User {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  phoneNumber       String      @unique
+  password          String
+  role              UserRole    @default(UNVERIFIED)
+  profileImage      String
+  bio               String?     @db.Text
+  isBanned          Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  crimeReports      CrimeReport[]
+  comments          Comment[]
+  votes             Vote[]
+  refreshTokens     RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  
+  // Relations
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model CrimeReport {
+  id                String    @id @default(uuid())
+  title             String    @db.VarChar(255)
+  description       String    @db.Text
+  aiDescription     String?   @db.Text
+  division          String
+  district          String
+  images            String[]
+  video             String?
+  location          Json?     // For storing latitude and longitude
+  reportedAt        DateTime  @default(now())
+  crimeTime         DateTime
+  verificationScore Int       @default(0)
+  isRemoved         Boolean   @default(false)
+  
+  // Relations
+  authorId          String
+  author            User      @relation(fields: [authorId], references: [id])
+  comments          Comment[]
+  votes             Vote[]
+
+  @@index([authorId])
+  @@index([division, district])
+  @@index([verificationScore])
+  @@index([reportedAt])
+}
+
+model Comment {
+  id        String      @id @default(uuid())
+  content   String      @db.Text
+  proof     String      // URL to image/video proof
+  isRemoved Boolean     @default(false)
+  createdAt DateTime    @default(now())
+
+  // Relations
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id])
+  reportId  String
+  report    CrimeReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([reportId])
+}
+
+model Vote {
+  id        String      @id @default(uuid())
+  value     Int         // 1 for upvote, -1 for downvote
+  createdAt DateTime    @default(now())
+
+  // Relations
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  reportId  String
+  report    CrimeReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, reportId])
+  @@index([userId])
+  @@index([reportId])
+}
