@@ -1,5 +1,6 @@
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const Nav = () => {
   return (
@@ -8,28 +9,29 @@ const Nav = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <Link href="/" className="flex items-center">
-              <span className="text-xl font-bold">Verdicto</span>
+              <Image src="/logo.png" alt="Verdicto" width={32} height={32} />
+              <span className="text-2xl font-bold ml-2">Verdicto</span>
             </Link>
           </div>
           <div className="flex space-x-8">
-            <Link 
-              href="/crimes" 
+            <Link
+              href="/crimes"
               className={cn(
                 "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
               )}
             >
               Crimes
             </Link>
-            <Link 
-              href="/auth/login" 
+            <Link
+              href="/auth/login"
               className={cn(
                 "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
               )}
             >
               Login
             </Link>
-            <Link 
-              href="/auth/register" 
+            <Link
+              href="/auth/register"
               className={cn(
                 "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
               )}
@@ -43,4 +45,4 @@ const Nav = () => {
   );
 };
 
-export default Nav; 
+export default Nav;
