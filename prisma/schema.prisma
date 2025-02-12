@@ -84,6 +84,9 @@ model reports {
   /// Date and time when the incident occurred
   incident_at   DateTime
 
+  /// Verification status of the report
+  verified Boolean @default(false)
+
   /// Timestamp when the report was created
   created_at DateTime @default(now())
   /// Timestamp when the report was last updated
@@ -235,11 +238,11 @@ model user_preferences {
   /// Types of notifications the user wants to receive
   notification_types notification_type[]
   /// Post image watermark 
-  watermark String?
+  watermark          String?
   /// Image quality
-  image_quality file_quality @default(low)
+  image_quality      file_quality        @default(low)
 
-  user               users               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 
 /// Types of notifications that can be sent to users
