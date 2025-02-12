@@ -139,7 +139,7 @@ export function PostCard({
             <div className="flex justify-center bg-green-100 rounded-full p-2">
               <CheckCircle color="green" className="size-5" />
             </div>
-          ) : score > 5 ? (
+          ) : score > 4 ? (
             <div className="flex justify-center bg-yellow-100 rounded-full p-2">
               <AlertTriangle color="orange" className="size-5" />
             </div>
