@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { TablesInsert } from "@/lib/database.types";
+import { Tables, TablesInsert } from "@/lib/database.types";
 import { createReport } from "@/lib/report";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -14,6 +14,8 @@ export default function CreatePostPage() {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [report, setReport] = useState<Tables<"reports">>();
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -23,24 +25,38 @@ export default function CreatePostPage() {
       const formData = Object.fromEntries(
         new FormData(e.currentTarget),
       ) as TablesInsert<"reports">;
-      const fileUrls = await Promise.all(
-        files.map(async (file) => {
-          // Here you would implement file upload logic
-          // Return the URL of the uploaded file
-          return "temp-url";
-        }),
-      );
 
-      //   const report = await createReport({
-      //     data: formData,
-      //     files: fileUrls.map((url) => ({ url })),
-      //   });
+      if (!report) {
+        setIsStreaming(true);
+        const { report, description } = await createReport({
+          data: formData,
+          files: files,
+        });
 
-      //   router.push(`/posts/${report.id}`);
+        setReport(report);
+
+        for await (const desc of description) {
+          setReport((prev) =>
+            !prev
+              ? undefined
+              : {
+                  ...prev,
+                  description: (prev?.description || "") + desc.response,
+                },
+          );
+        }
+      } else {
+        const { report: fullReport } = await createReport({
+          data: formData,
+          files: files,
+        });
+        router.push(`/posts/${fullReport.id}`);
+      }
     } catch (error) {
       console.error(error);
       // Handle error appropriately
     } finally {
+      setIsStreaming(false);
       setLoading(false);
     }
   };
@@ -59,7 +75,11 @@ export default function CreatePostPage() {
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" required />
+            <Textarea
+              id="description"
+              name="description"
+              value={report?.description}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -94,7 +114,7 @@ export default function CreatePostPage() {
             />
           </div>
 
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={isStreaming || loading}>
             {loading ? "Creating..." : "Create Post"}
           </Button>
         </form>
