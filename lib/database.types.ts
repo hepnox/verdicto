@@ -551,6 +551,8 @@ export type Database = {
           created_at: string;
           /** User's email address, must be unique */
           email: string;
+          /** User's full name */
+          full_name: string;
           /** Unique identifier for the user */
           id: string;
           /** Hashed password for user authentication */
@@ -578,6 +580,8 @@ export type Database = {
           created_at?: string;
           /** User's email address, must be unique */
           email: string;
+          /** User's full name */
+          full_name: string;
           /** Unique identifier for the user */
           id?: string;
           /** Hashed password for user authentication */
@@ -605,6 +609,8 @@ export type Database = {
           created_at?: string;
           /** User's email address, must be unique */
           email?: string;
+          /** User's full name */
+          full_name?: string;
           /** Unique identifier for the user */
           id?: string;
           /** Hashed password for user authentication */

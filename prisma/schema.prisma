@@ -41,6 +41,8 @@ model users {
   phone      String      @unique
   /// Hashed password for user authentication
   password   String
+  /// User's full name
+  full_name  String
   /// User's role in the system
   role       user_role   @default(member)
   /// Current status of the user account

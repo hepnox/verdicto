@@ -25,7 +25,9 @@ export default function CreatePostPage() {
     setFiles(selectedFiles);
 
     // Get first image file for AI description
-    const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+    const imageFiles = selectedFiles.filter((file) =>
+      file.type.startsWith("image/"),
+    );
     if (imageFiles.length > 0) {
       try {
         setAiLoading(true);
@@ -37,7 +39,7 @@ export default function CreatePostPage() {
         }
         setDescription(aiDescription);
       } catch (error) {
-        console.error('Error getting AI description:', error);
+        console.error("Error getting AI description:", error);
       } finally {
         setAiLoading(false);
       }
@@ -95,6 +97,11 @@ export default function CreatePostPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="hidden"
+            name="user_id"
+            value={"622593a9-5df6-4007-a73f-7baa821b06cb"}
+          />
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" name="title" required />
@@ -108,7 +115,9 @@ export default function CreatePostPage() {
               required
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder={aiLoading ? "Getting AI description..." : "Enter description"}
+              placeholder={
+                aiLoading ? "Getting AI description..." : "Enter description"
+              }
               disabled={aiLoading}
             />
           </div>
