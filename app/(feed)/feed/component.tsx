@@ -18,8 +18,8 @@ import {
   CheckCircle,
   MapPin,
   Clock,
-  ThumbsUp,
-  ThumbsDown,
+  CircleArrowUp,
+  CircleArrowDown,
   MessageSquare,
   AlertTriangle,
   XCircle,
@@ -206,7 +206,7 @@ export function PostCard({
               disabled={isLoading}
               className={userReaction === "upvote" ? "bg-green-100" : ""}
             >
-              <ThumbsUp className="w-4 h-4 mr-1" />
+              <CircleArrowUp className="w-4 h-4 mr-1" />
               {upvotes}
             </Button>
             <Button
@@ -216,7 +216,7 @@ export function PostCard({
               disabled={isLoading}
               className={userReaction === "downvote" ? "bg-red-100" : ""}
             >
-              <ThumbsDown className="w-4 h-4 mr-1" />
+              <CircleArrowDown className="w-4 h-4 mr-1" />
               {downvotes}
             </Button>
             <ContactList content={post.description} />
