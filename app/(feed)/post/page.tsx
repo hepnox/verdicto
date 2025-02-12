@@ -5,12 +5,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getAddressSuggestions } from "@/lib/addressAutocomplete";
 import { getImageContext } from "@/lib/ai";
 import { TablesInsert } from "@/lib/database.types";
-import { uploadFile } from "@/lib/file";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createReport } from "./action";
+
+interface BarikoiPlace {
+  id: number;
+  longitude: number;
+  latitude: number;
+  address: string;
+  city: string;
+  area: string;
+  postCode: number;
+}
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -21,6 +31,10 @@ export default function CreatePostPage() {
   const [report, setReport] = useState<TablesInsert<"reports"> | undefined>();
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState("");
+  const [addressQuery, setAddressQuery] = useState("");
+  const [addressSuggestions, setAddressSuggestions] = useState<BarikoiPlace[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<BarikoiPlace | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Add Bangladesh administrative data
   const bangladeshData = {
@@ -102,6 +116,25 @@ export default function CreatePostPage() {
     }
   };
 
+  const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setAddressQuery(query);
+    setShowSuggestions(true);
+
+    if (query.length > 2) {
+      const suggestions = await getAddressSuggestions(query, selectedDivision);
+      setAddressSuggestions(suggestions);
+    } else {
+      setAddressSuggestions([]);
+    }
+  };
+
+  const handleLocationSelect = (place: BarikoiPlace) => {
+    setSelectedLocation(place);
+    setAddressQuery(place.address);
+    setShowSuggestions(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -109,26 +142,40 @@ export default function CreatePostPage() {
     try {
       const formData = Object.fromEntries(
         new FormData(e.currentTarget),
-      ) as TablesInsert<"reports">;
+      ) as unknown as TablesInsert<"reports">;
+
+      if (!selectedLocation) {
+        alert("Please select a valid address from suggestions");
+        return;
+      }
 
       if (!report) {
         setIsStreaming(true);
 
-        const uploadedImages = await Promise.all(files.map(async (file) => {
-          const uploadedImage = await uploadFile(file, 'images');
-          return uploadedImage.signedUrl;
-        }));
+        // Create geolocation first
+        const geoLocationData = {
+          latitude: selectedLocation.latitude,
+          longitude: selectedLocation.longitude,
+        };
+
+        // const uploadedImages = await Promise.all(files.map(async (file) => {
+        //   const uploadedImage = await uploadFileToSupabase(file, 'images');
+        //   return uploadedImage.signedUrl;
+        // }));
+
+        // Add golocation_id to formData
         const createdReport = await createReport({
-          data: formData,
-          files: uploadedImages.map(image => ({ url: image, user_id: formData.user_id })),
+          data: {
+            ...formData,
+          },
+          location: geoLocationData,
+          files: files,
         });
 
         setReport(createdReport.report);
-        // router.push(`/posts/${createdReport.report.id}`);
       }
     } catch (error) {
       console.error(error);
-      // Handle error appropriately
     } finally {
       setIsStreaming(false);
       setLoading(false);
@@ -207,21 +254,39 @@ export default function CreatePostPage() {
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="address">Full Address</Label>
+          <div className="relative">
+            <Label htmlFor="address">Address</Label>
             <Input 
               id="address" 
-              name="address" 
-              placeholder="Enter detailed address"
+              value={addressQuery}
+              onChange={handleAddressChange}
+              placeholder="Search for an address"
               required 
             />
+            
+            {showSuggestions && !!addressSuggestions?.length && (
+              <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
+                {addressSuggestions?.map((place) => (
+                  <div
+                    key={place.id}
+                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    onClick={() => handleLocationSelect(place)}
+                  >
+                    <div className="font-medium">{place.address}</div>
+                    <div className="text-sm text-gray-500">
+                      {place.area}, {place.city} - {place.postCode}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
             <Label htmlFor="crimeTime">Crime Time</Label>
             <Input
               id="crimeTime"
-              name="crimeTime"
+              name="incident_at"
               type="datetime-local"
               required
             />

@@ -1,14 +1,26 @@
 "use server";
 import { createClient } from "@/lib/supabase/server";
 import { Tables, TablesInsert } from "../../../lib/database.types";
-import { uploadFile } from "../../../lib/file";
-import { downloadAndCompressImage } from "../../../lib/file.server";
+import { uploadFileToSupabase } from "../../../lib/file";
 
 export async function createReport(args: {
   data: TablesInsert<"reports">;
-  files: TablesInsert<"files">[];
+  location?: TablesInsert<"geolocations">;
+  files: File[];
 }) {
   const supabase = await createClient();
+  let locationId = args.location?.id ?? undefined;
+  if (!locationId && args.location) {
+  const createdLocation = await supabase
+    .from("geolocations")
+    .insert(args.location)
+    .select()
+    .single();
+
+    if (createdLocation.error) throw new Error(createdLocation.error.message);
+    if (createdLocation.data) locationId = createdLocation.data.id;
+  }
+
   const userPreferences = await supabase
     .from("user_preferences")
     .select("*")
@@ -18,20 +30,7 @@ export async function createReport(args: {
   // Download and upload the compressed image without watermark
   const compressedImages = await Promise.all(
     args.files.map(async (file) => {
-      const compressedImage = await downloadAndCompressImage(
-        file.url,
-        userPreferences.data?.watermark ?? undefined,
-        userPreferences.data?.image_quality ?? "low",
-      );
-
-      // Create FormData to upload file
-      const formData = new FormData();
-      formData.append(
-        "file",
-        new File([compressedImage], file.url.split("/").pop() ?? "image.jpg"),
-      );
-
-      const uploadedCompressedImage = await uploadFile(formData, "images");
+      const uploadedCompressedImage = await uploadFileToSupabase(file, "images");
       return uploadedCompressedImage.signedUrl;
     }),
   );
@@ -48,9 +47,21 @@ export async function createReport(args: {
 
   if (createdFiles.error) throw new Error(createdFiles.error.message);
 
+  delete args.data.district;
+  delete args.data.division;
+  if (!args.data.id) delete args.data.id;
   const createdReport = await supabase
     .from("reports")
-    .insert(args.data)
+    .insert({
+      title: args.data.title,
+      description: args.data.description,
+      golocation_id: locationId ?? "",
+      incident_at: args.data.incident_at,
+      user_id: args.data.user_id,
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+
+    })
     .select()
     .single();
 
@@ -80,6 +91,7 @@ export async function createReport(args: {
 export async function updateReport(args: {
   report: Pick<Tables<"reports">, "id" | "title" | "description">;
 }) {
+  const supabase = await createClient();
   const updatedReport = await supabase
     .from("reports")
     .update(args.report)
@@ -88,10 +100,4 @@ export async function updateReport(args: {
     .single();
   if (updatedReport.error) throw new Error(updatedReport.error.message);
   return updatedReport.data;
-}
-
-export async function getReports() {
-  const reports = await supabase.from("reports").select("*, files(*)");
-  if (reports.error) throw new Error(reports.error.message);
-  return reports.data;
 }

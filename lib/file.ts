@@ -1,6 +1,8 @@
+
+'use server';
 import { Enums } from "./database.types";
-import { processImageBuffer } from "./file.server";
-import supabase from "./supabase";
+import { createClient } from "./supabase/server";
+import sharp from 'sharp';
 
 const bucket = "media";
 
@@ -10,6 +12,7 @@ export const uploadFileToSupabase = async (
   quality: Enums<"file_quality"> = "low",
   watermark?: string,
 ) => {
+  const supabase = await createClient();
   const fileExt = file.name.split(".").pop()?.toLowerCase();
   const fileName = `${Math.random()}.${fileExt}`;
   const filePath = `${path}/${fileName}`;
@@ -26,7 +29,7 @@ export const uploadFileToSupabase = async (
     fileExt &&
     ["jpg", "jpeg", "png", "webp"].includes(fileExt)
   ) {
-    processedBuffer = await processImageBuffer(
+    processedBuffer = await uploadCompressedImage(
       buffer,
       fileExt,
       quality,
@@ -48,15 +51,41 @@ export const uploadFileToSupabase = async (
   };
 };
 
-export const uploadFile = async (formData: FormData, folder: string) => {
-  const response = await fetch("/post", {
-    method: "POST",
-    body: formData,
-  });
 
-  if (!response.ok) {
-    throw new Error("Upload failed");
+
+export async function uploadCompressedImage(
+  buffer: Buffer,
+  fileExt: string,
+  quality: Enums<'file_quality'>,
+  watermark?: string
+): Promise<Buffer> {
+  let sharpInstance = sharp(buffer);
+
+  // Apply compression based on quality
+  const compressionOptions = {
+    low: { quality: 60 },
+    medium: { quality: 80 },
+    high: { quality: 90 },
+    original: { quality: 100 }
+  };
+  
+  // Add watermark if provided
+  if (watermark) {
+    const watermarkBuffer = Buffer.from(
+      `<svg><text x="50%" y="50%" font-family="Arial" font-size="24" fill="rgba(255,255,255,0.5)" text-anchor="middle">${watermark}</text></svg>`
+    );
+    sharpInstance = sharpInstance.composite([
+      {
+        input: watermarkBuffer,
+        top: 10,
+        left: 10,
+      },
+    ]);
   }
 
-  return response.json();
-};
+  // Process the image
+  return sharpInstance
+    .toFormat(fileExt as keyof sharp.FormatEnum)
+    .jpeg(compressionOptions[quality])
+    .toBuffer();
+} 
