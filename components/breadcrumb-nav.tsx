@@ -9,6 +9,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { kebabToTitle } from "@/helpers/text";
 
 export function BreadcrumbNav() {
   const pathname = usePathname();
@@ -16,8 +17,7 @@ export function BreadcrumbNav() {
     .split("/")
     .filter((segment) => segment)
     .map((segment) => ({
-      label:
-        segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "),
+      label: kebabToTitle(segment),
       href: segment,
     }));
 
