@@ -7,97 +7,146 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+generator supabase {
+  provider = "prisma-supabase"
+  output   = "./../lib/database.types.ts" // Optional: Defaults to ./database.ts which would store in ./prisma/database.ts
+  enableDocumentation = true // Optional: Defaults to true
+}
+
+/// User role enum defining access levels in the system
 enum user_role {
+  /// Regular user with standard permissions
   member
+  /// Administrator with full system access
   admin
 }
 
+/// User account status
 enum user_status {
+  /// User account is active and can use the system
   active
+  /// User account is temporarily disabled
   inactive
+  /// User account is permanently blocked
   banned
 }
 
+/// User account information and authentication details
 model users {
-  id         String    @id @default(uuid()) @db.Uuid
-  email      String    @unique
-  phone      String    @unique
+  /// Unique identifier for the user
+  id         String      @id @default(uuid()) @db.Uuid
+  /// User's email address, must be unique
+  email      String      @unique
+  /// User's phone number, must be unique
+  phone      String      @unique
+  /// Hashed password for user authentication
   password   String
-  role       user_role @default(member)
+  /// User's role in the system
+  role       user_role   @default(member)
+  /// Current status of the user account
   status     user_status @default(active)
+  /// URL to user's profile picture
   avatar_url String
 
+  /// Timestamp when the user account was created
   created_at DateTime @default(now())
+  /// Timestamp when the user account was last updated
   updated_at DateTime @updatedAt
 
   // Relations
-  reports   reports[]
-  comments  report_comments[]
-  reactions report_reactions[]
-  files     files[]
+  reports          reports[]
+  comments         report_comments[]
+  reactions        report_reactions[]
+  files            files[]
+  user_preferences user_preferences[]
+  notifications    notifications[]
 
   // Indexes
   @@index([created_at, updated_at])
   @@index([email, phone, password])
 }
 
+/// Incident reports submitted by users
 model reports {
+  /// Unique identifier for the report
   id            String   @id @default(uuid()) @db.Uuid
+  /// Title of the incident report
   title         String   @db.VarChar(255)
+  /// Detailed description of the incident
   description   String   @db.Text
+  /// Reference to the location where the incident occurred
   golocation_id String   @db.Uuid
+  /// Date and time when the incident occurred
   incident_at   DateTime
 
+  /// Timestamp when the report was created
   created_at DateTime @default(now())
+  /// Timestamp when the report was last updated
   updated_at DateTime @updatedAt
 
   // Relations
-  user_id      String    @db.Uuid
-  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  comments     report_comments[]
-  reactions    report_reactions[]
-  report_files report_files[]
-  golocation   geolocations       @relation(fields: [golocation_id], references: [id])
+  user_id       String             @db.Uuid
+  users         users              @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comments      report_comments[]
+  reactions     report_reactions[]
+  report_files  report_files[]
+  golocation    geolocations       @relation(fields: [golocation_id], references: [id])
+  notifications notifications[]
 
   // Indexes
   @@index([user_id])
   @@index([created_at])
 }
 
+/// Comments on incident reports
 model report_comments {
-  id         String   @id @default(uuid()) @db.Uuid
-  content    String   @db.Text
+  /// Unique identifier for the comment
+  id      String @id @default(uuid()) @db.Uuid
+  /// Text content of the comment
+  content String @db.Text
 
+  /// Timestamp when the comment was created
   created_at DateTime @default(now())
+  /// Timestamp when the comment was last updated
   updated_at DateTime @updatedAt
-  user_id     String    @db.Uuid
-  report_id   String    @db.Uuid
+  /// Reference to the user who created the comment
+  user_id    String   @db.Uuid
+  /// Reference to the report being commented on
+  report_id  String   @db.Uuid
 
   // Relations
-  user        users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  report      reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  user          users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  report        reports         @relation(fields: [report_id], references: [id], onDelete: Cascade)
   comment_files comment_files[]
+  notifications notifications[]
 
   // Indexes
   @@index([user_id])
   @@index([report_id])
 }
 
+/// Types of reactions that can be made on reports
 enum report_reaction_type {
+  /// Positive reaction to a report
   upvote
+  /// Negative reaction to a report
   downvote
 }
 
+/// User reactions on reports
 model report_reactions {
+  /// Unique identifier for the reaction
   id         String               @id @default(uuid()) @db.Uuid
+  /// Type of reaction (upvote/downvote)
   type       report_reaction_type
+  /// Timestamp when the reaction was created
   created_at DateTime             @default(now())
 
   // Relations
-  user_id   String    @db.Uuid
-  user      users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  report_id String    @db.Uuid
-  report    reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  user_id   String  @db.Uuid
+  user      users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  report_id String  @db.Uuid
+  report    reports @relation(fields: [report_id], references: [id], onDelete: Cascade)
 
   // Indexes
   @@unique([user_id, report_id])
@@ -105,17 +154,24 @@ model report_reactions {
   @@index([report_id])
 }
 
+/// File metadata for uploaded files
 model files {
+  /// Unique identifier for the file
   id         String   @id @default(uuid()) @db.Uuid
+  /// Original name of the uploaded file
   filename   String
+  /// Storage path of the file
   path       String
+  /// MIME type of the file
   mime_type  String
+  /// File size in bytes
   size       Int
+  /// Timestamp when the file was uploaded
   created_at DateTime @default(now())
 
   // Relations
-  user_id       String    @db.Uuid
-  user          users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id       String          @db.Uuid
+  user          users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
   report_files  report_files[]
   comment_files comment_files[]
 
@@ -123,23 +179,35 @@ model files {
   @@index([user_id])
 }
 
+/// Junction table linking reports to files
 model report_files {
-  id        String    @id @default(uuid()) @db.Uuid
-  report_id String    @db.Uuid
-  report    reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
-  file_id   String    @db.Uuid
-  file      files     @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  /// Unique identifier for the report-file association
+  id        String  @id @default(uuid()) @db.Uuid
+  /// Reference to the associated report
+  report_id String  @db.Uuid
+  /// Reference to the associated file
+  file_id   String  @db.Uuid
+
+  // Relations
+  report    reports @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  file      files   @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   // Indexes
   @@index([report_id])
   @@index([file_id])
 }
 
+/// Junction table linking comments to files
 model comment_files {
+  /// Unique identifier for the comment-file association
   id         String          @id @default(uuid()) @db.Uuid
+  /// Reference to the associated comment
   comment_id String          @db.Uuid
-  comment    report_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  /// Reference to the associated file
   file_id    String          @db.Uuid
+
+  // Relations
+  comment    report_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade)
   file       files           @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   // Indexes
@@ -147,10 +215,70 @@ model comment_files {
   @@index([file_id])
 }
 
+/// User notification preferences
+model user_preferences {
+  /// Unique identifier for the preference settings
+  id                 String              @id @default(uuid()) @db.Uuid
+  /// Reference to the user
+  user_id            String              @db.Uuid
+  /// Types of notifications the user wants to receive
+  notification_types notification_type[]
+  user               users               @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+/// Types of notifications that can be sent to users
+enum notification_type {
+  /// Notification for new comments
+  comment
+  /// Notification for votes on reports
+  vote
+  /// Notification for administrative actions
+  admin_action
+}
+
+/// User notifications
+model notifications {
+  /// Unique identifier for the notification
+  id         String            @id @default(uuid()) @db.Uuid
+  /// Type of notification
+  type       notification_type
+  /// Notification title
+  title      String
+  /// Notification content/message
+  content    String
+  /// Whether the notification has been read
+  read       Boolean           @default(false)
+  /// Timestamp when the notification was created
+  created_at DateTime          @default(now())
+
+  // Relations
+  user_id String @db.Uuid
+  user    users  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // Optional relations based on notification type
+  report_id String?  @db.Uuid
+  report    reports? @relation(fields: [report_id], references: [id], onDelete: Cascade)
+
+  comment_id String?          @db.Uuid
+  comment    report_comments? @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([user_id])
+  @@index([report_id])
+  @@index([comment_id])
+  @@index([created_at])
+  @@index([read])
+}
+
+/// Geographic locations for incidents
 model geolocations {
+  /// Unique identifier for the location
   id         String    @id @default(uuid()) @db.Uuid
+  /// Latitude coordinate
   latitude   Float
+  /// Longitude coordinate
   longitude  Float
+  /// Timestamp when the location was created
   created_at DateTime  @default(now())
   reports    reports[]
 
