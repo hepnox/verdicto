@@ -6,7 +6,7 @@ export async function sendSMS(
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `https://localhost:44352/api/Users/send/${phoneNumber}?sms=${encodeURIComponent(message)}`,
+      `https://app.yfbd.org/api/Users/send/${phoneNumber}?sms=${encodeURIComponent(message)}`,
       {
         method: "GET",
         headers: {
