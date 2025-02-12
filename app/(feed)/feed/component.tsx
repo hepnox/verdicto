@@ -320,7 +320,7 @@ const ContactList = (props: { content: string }) => {
           }
         }}
       >
-        <option value="" disabled selected>Select emergency contact</option>
+        <option value="" disabled selected>Select {find.toLocaleLowerCase()} contact</option>
         {list.map((match, index) => {
           // Handle invalid match objects
           if (!match || !match.district || !match.phone) {
