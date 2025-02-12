@@ -1,36 +1,36 @@
+import { Tables } from "@/lib/database.types";
 import { createClient } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+
+type MergedUser = User & Tables<"users">;
 
 export function useAuth() {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
-    const supabase = createClient();
+  const supabase = createClient();
 
-    useEffect(() => {
-        async function fetchUser() {
-            const { data, error } = await supabase.auth.getUser();
-            if (error) {
-                console.error("Error fetching user:", error.message);
-                setUser(null);
-            } else {
-                setUser(data?.user || null);
-            }
-            setLoading(false);
-        }
+  const { data: user, isLoading } = useQuery<MergedUser | null>({
+    queryKey: ["auth-user"],
+    queryFn: async () => {
+      const { data: authData, error: authError } =
+        await supabase.auth.getUser();
 
-        fetchUser();
+      if (authError || !authData.user) {
+        return null;
+      }
 
-        const { data: authListener } = supabase.auth.onAuthStateChange(
-            (_event, session) => {
-                setUser(session?.user || null);
-            }
-        );
+      const { data: dbUser } = await supabase
+        .from("users")
+        .select()
+        .eq("id", authData.user.id)
+        .single();
+      if (!dbUser) {
+        return null;
+      }
 
-        return () => {
-            authListener.subscription.unsubscribe();
-        };
-    }, []);
+      return { ...authData.user, ...dbUser };
+    },
+  });
 
-    return { user, loading };
+  return { user, loading: isLoading };
 }
