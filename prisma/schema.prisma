@@ -31,25 +31,6 @@ enum user_status {
   banned
 }
 
-/// OTP verification records
-model otps {
-  /// Unique identifier for the OTP record
-  id         String   @id @default(uuid()) @db.Uuid
-  /// Phone number the OTP was sent to
-  phone      String
-  /// The OTP code sent to the user
-  code       String
-  /// Whether this OTP has been used
-  used       Boolean  @default(false)
-  /// When this OTP expires
-  expires_at DateTime
-  /// When this OTP was created
-  created_at DateTime @default(now())
-
-  @@index([phone, code])
-  @@index([expires_at])
-}
-
 /// User account information and authentication details
 model users {
   /// Unique identifier for the user

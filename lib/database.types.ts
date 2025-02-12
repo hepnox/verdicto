@@ -214,52 +214,6 @@ export type Database = {
           },
         ];
       };
-      /** OTP verification records */
-      otps: {
-        Row: {
-          /** The OTP code sent to the user */
-          code: string;
-          /** When this OTP was created */
-          created_at: string;
-          /** When this OTP expires */
-          expires_at: string;
-          /** Unique identifier for the OTP record */
-          id: string;
-          /** Phone number the OTP was sent to */
-          phone: string;
-          /** Whether this OTP has been used */
-          used: boolean;
-        };
-        Insert: {
-          /** The OTP code sent to the user */
-          code: string;
-          /** When this OTP was created */
-          created_at?: string;
-          /** When this OTP expires */
-          expires_at: string;
-          /** Unique identifier for the OTP record */
-          id?: string;
-          /** Phone number the OTP was sent to */
-          phone: string;
-          /** Whether this OTP has been used */
-          used?: boolean;
-        };
-        Update: {
-          /** The OTP code sent to the user */
-          code?: string;
-          /** When this OTP was created */
-          created_at?: string;
-          /** When this OTP expires */
-          expires_at?: string;
-          /** Unique identifier for the OTP record */
-          id?: string;
-          /** Phone number the OTP was sent to */
-          phone?: string;
-          /** Whether this OTP has been used */
-          used?: boolean;
-        };
-        Relationships: [];
-      };
       /** Comments on incident reports */
       report_comments: {
         Row: {
