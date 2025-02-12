@@ -7,100 +7,153 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  UNVERIFIED
-  VERIFIED
-  ADMIN
+enum user_role {
+  member
+  admin
 }
 
-model User {
-  id                String      @id @default(uuid())
-  email             String      @unique
-  phoneNumber       String      @unique
-  password          String
-  role              UserRole    @default(UNVERIFIED)
-  profileImage      String
-  bio               String?     @db.Text
-  isBanned          Boolean     @default(false)
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-
-  // Relations
-  crimeReports      CrimeReport[]
-  comments          Comment[]
-  votes             Vote[]
-  refreshTokens     RefreshToken[]
+enum user_status {
+  active
+  inactive
+  banned
 }
 
-model RefreshToken {
-  id        String    @id @default(uuid())
-  token     String    @unique
-  expiresAt DateTime
-  createdAt DateTime  @default(now())
-  
-  // Relations
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+model users {
+  id         String    @id @default(uuid()) @db.Uuid
+  email      String    @unique
+  phone      String    @unique
+  password   String
+  role       user_role @default(member)
+  status     user_status @default(active)
+  avatar_url String
 
-  @@index([userId])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  reports   reports[]
+  comments  report_comments[]
+  reactions report_reactions[]
+  files     files[]
+
+  // Indexes
+  @@index([created_at, updated_at])
+  @@index([email, phone, password])
 }
 
-model CrimeReport {
-  id                String    @id @default(uuid())
-  title             String    @db.VarChar(255)
-  description       String    @db.Text
-  aiDescription     String?   @db.Text
-  division          String
-  district          String
-  images            String[]
-  video             String?
-  location          Json?     // For storing latitude and longitude
-  reportedAt        DateTime  @default(now())
-  crimeTime         DateTime
-  verificationScore Int       @default(0)
-  isRemoved         Boolean   @default(false)
-  
-  // Relations
-  authorId          String
-  author            User      @relation(fields: [authorId], references: [id])
-  comments          Comment[]
-  votes             Vote[]
+model reports {
+  id            String   @id @default(uuid()) @db.Uuid
+  title         String   @db.VarChar(255)
+  description   String   @db.Text
+  golocation_id String   @db.Uuid
+  incident_at   DateTime
 
-  @@index([authorId])
-  @@index([division, district])
-  @@index([verificationScore])
-  @@index([reportedAt])
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relations
+  user_id      String    @db.Uuid
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comments     report_comments[]
+  reactions    report_reactions[]
+  report_files report_files[]
+  golocation   geolocations       @relation(fields: [golocation_id], references: [id])
+
+  // Indexes
+  @@index([user_id])
+  @@index([created_at])
 }
 
-model Comment {
-  id        String      @id @default(uuid())
-  content   String      @db.Text
-  proof     String      // URL to image/video proof
-  isRemoved Boolean     @default(false)
-  createdAt DateTime    @default(now())
+model report_comments {
+  id         String   @id @default(uuid()) @db.Uuid
+  content    String   @db.Text
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  user_id     String    @db.Uuid
+  report_id   String    @db.Uuid
 
   // Relations
-  authorId  String
-  author    User        @relation(fields: [authorId], references: [id])
-  reportId  String
-  report    CrimeReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  user        users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  report      reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  comment_files comment_files[]
 
-  @@index([authorId])
-  @@index([reportId])
+  // Indexes
+  @@index([user_id])
+  @@index([report_id])
 }
 
-model Vote {
-  id        String      @id @default(uuid())
-  value     Int         // 1 for upvote, -1 for downvote
-  createdAt DateTime    @default(now())
+enum report_reaction_type {
+  upvote
+  downvote
+}
+
+model report_reactions {
+  id         String               @id @default(uuid()) @db.Uuid
+  type       report_reaction_type
+  created_at DateTime             @default(now())
 
   // Relations
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  reportId  String
-  report    CrimeReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  user_id   String    @db.Uuid
+  user      users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  report_id String    @db.Uuid
+  report    reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
 
-  @@unique([userId, reportId])
-  @@index([userId])
-  @@index([reportId])
+  // Indexes
+  @@unique([user_id, report_id])
+  @@index([user_id])
+  @@index([report_id])
+}
+
+model files {
+  id         String   @id @default(uuid()) @db.Uuid
+  filename   String
+  path       String
+  mime_type  String
+  size       Int
+  created_at DateTime @default(now())
+
+  // Relations
+  user_id       String    @db.Uuid
+  user          users     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  report_files  report_files[]
+  comment_files comment_files[]
+
+  // Indexes
+  @@index([user_id])
+}
+
+model report_files {
+  id        String    @id @default(uuid()) @db.Uuid
+  report_id String    @db.Uuid
+  report    reports   @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  file_id   String    @db.Uuid
+  file      files     @relation(fields: [file_id], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([report_id])
+  @@index([file_id])
+}
+
+model comment_files {
+  id         String          @id @default(uuid()) @db.Uuid
+  comment_id String          @db.Uuid
+  comment    report_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  file_id    String          @db.Uuid
+  file       files           @relation(fields: [file_id], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([comment_id])
+  @@index([file_id])
+}
+
+model geolocations {
+  id         String    @id @default(uuid()) @db.Uuid
+  latitude   Float
+  longitude  Float
+  created_at DateTime  @default(now())
+  reports    reports[]
+
+  // Indexes
+  @@index([created_at])
 }
