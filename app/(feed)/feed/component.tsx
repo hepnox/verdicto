@@ -22,6 +22,8 @@ import {
   ThumbsDown,
   MessageSquare,
 } from "lucide-react";
+import { toggleReaction, addComment, getCrimeReports } from "../action";
+import { useQuery } from "@tanstack/react-query";
 
 interface PostCardProps {
   title: string;
@@ -33,6 +35,12 @@ interface PostCardProps {
   crimeTime: Date;
   isVerified: boolean;
   width?: "sm" | "md" | "lg" | "xl" | "full";
+  id: string;
+  userId: string;
+  reactions?: Array<{
+    type: 'upvote' | 'downvote';
+    user_id: string;
+  }>;
 }
 
 export function PostCard({
@@ -45,9 +53,13 @@ export function PostCard({
   crimeTime,
   isVerified,
   width = "md",
+  id,
+  userId,
+  reactions = [],
 }: PostCardProps) {
-  const [upvotes, setUpvotes] = useState(0);
-  const [downvotes, setDownvotes] = useState(0);
+  const upvotes = reactions.filter(r => r.type === 'upvote').length;
+  const downvotes = reactions.filter(r => r.type === 'downvote').length;
+  const userReaction = reactions.find(r => r.user_id === userId)?.type;
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
 
@@ -59,14 +71,19 @@ export function PostCard({
     full: "w-full",
   };
 
-  const handleUpvote = () => setUpvotes((prev) => prev + 1);
-  const handleDownvote = () => setDownvotes((prev) => prev + 1);
+  const handleUpvote = async () => {
+    await toggleReaction(id, userId, 'upvote');
+  };
+
+  const handleDownvote = async () => {
+    await toggleReaction(id, userId, 'downvote');
+  };
+
   const toggleCommentInput = () => setShowCommentInput((prev) => !prev);
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically send the comment to your backend
-    console.log("Comment submitted:", comment);
+    await addComment(id, userId, comment);
     setComment("");
     setShowCommentInput(false);
   };
@@ -140,11 +157,21 @@ export function PostCard({
         </div>
         <div className="flex justify-between w-full">
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={handleUpvote}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleUpvote}
+              className={userReaction === 'upvote' ? 'bg-green-100' : ''}
+            >
               <ThumbsUp className="w-4 h-4 mr-1" />
               {upvotes}
             </Button>
-            <Button variant="outline" size="sm" onClick={handleDownvote}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleDownvote}
+              className={userReaction === 'downvote' ? 'bg-red-100' : ''}
+            >
               <ThumbsDown className="w-4 h-4 mr-1" />
               {downvotes}
             </Button>
@@ -172,3 +199,26 @@ export function PostCard({
     </Card>
   );
 }
+
+
+export  function Crimes() {
+    const reportsQuery = useQuery({
+      queryKey: ['reports'],
+      queryFn: getCrimeReports
+  })
+  
+  if (reportsQuery.isLoading) return <div>Loading...</div>
+  if (reportsQuery.isError) return <div>Error: {reportsQuery.error.message}</div>
+  
+  const reports = reportsQuery.data;
+  console.log(reports);
+    return (
+ 
+        <div className="space-y-6">
+          {reports?.map((post) => (
+            <PostCard key={post.id} {...post} width="full" />
+          ))}
+        </div>
+
+    );
+  }
