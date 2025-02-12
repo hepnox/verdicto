@@ -1,11 +1,11 @@
-export default function RegisterPage() {
+import { SignupForm } from "./component";
+
+export default function Page() {
   return (
-    <div className="max-w-md mx-auto px-4 py-12">
-      <h2 className="text-2xl font-semibold mb-6">Register</h2>
-      <div className="bg-white p-6 rounded-lg shadow">
-        {/* Registration form will be added here */}
-        <p className="text-gray-500">Registration form coming soon.</p>
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <SignupForm />
       </div>
     </div>
   );
-} 
+}
