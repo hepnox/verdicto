@@ -173,6 +173,14 @@ model files {
   @@index([user_id])
 }
 
+/// Quality of the file
+enum file_quality {
+  low
+  medium
+  high
+  original
+}
+
 /// Junction table linking reports to files
 model report_files {
   /// Unique identifier for the report-file association
@@ -182,6 +190,9 @@ model report_files {
   /// Reference to the associated file
   file_id   String @db.Uuid
 
+  // quality compressed or original
+  quality file_quality @default(low)
+
   // Relations
   report reports @relation(fields: [report_id], references: [id], onDelete: Cascade)
   file   files   @relation(fields: [file_id], references: [id], onDelete: Cascade)
@@ -189,6 +200,7 @@ model report_files {
   // Indexes
   @@index([report_id])
   @@index([file_id])
+  @@index([quality])
 }
 
 /// Junction table linking comments to files
@@ -217,6 +229,11 @@ model user_preferences {
   user_id            String              @db.Uuid
   /// Types of notifications the user wants to receive
   notification_types notification_type[]
+  /// Post image watermark 
+  watermark String?
+  /// Image quality
+  image_quality file_quality @default(low)
+
   user               users               @relation(fields: [user_id], references: [id], onDelete: Cascade)
 }
 

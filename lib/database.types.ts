@@ -282,6 +282,13 @@ export type Database = {
           file_id: string;
           /** Unique identifier for the report-file association */
           id: string;
+          /**
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          quality: Database["public"]["Enums"]["file_quality"];
           /** Reference to the associated report */
           report_id: string;
         };
@@ -290,6 +297,13 @@ export type Database = {
           file_id: string;
           /** Unique identifier for the report-file association */
           id?: string;
+          /**
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          quality?: Database["public"]["Enums"]["file_quality"];
           /** Reference to the associated report */
           report_id: string;
         };
@@ -298,6 +312,13 @@ export type Database = {
           file_id?: string;
           /** Unique identifier for the report-file association */
           id?: string;
+          /**
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          quality?: Database["public"]["Enums"]["file_quality"];
           /** Reference to the associated report */
           report_id?: string;
         };
@@ -451,6 +472,13 @@ export type Database = {
         Row: {
           /** Unique identifier for the preference settings */
           id: string;
+          /** Image quality
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          image_quality: Database["public"]["Enums"]["file_quality"];
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
@@ -459,10 +487,19 @@ export type Database = {
           notification_types: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
           user_id: string;
+          /** Post image watermark */
+          watermark: string | null;
         };
         Insert: {
           /** Unique identifier for the preference settings */
           id?: string;
+          /** Image quality
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          image_quality?: Database["public"]["Enums"]["file_quality"];
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
@@ -471,10 +508,19 @@ export type Database = {
           notification_types: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
           user_id: string;
+          /** Post image watermark */
+          watermark?: string | null;
         };
         Update: {
           /** Unique identifier for the preference settings */
           id?: string;
+          /** Image quality
+           * - low
+           * - medium
+           * - high
+           * - original
+           */
+          image_quality?: Database["public"]["Enums"]["file_quality"];
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
@@ -483,6 +529,8 @@ export type Database = {
           notification_types?: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
           user_id?: string;
+          /** Post image watermark */
+          watermark?: string | null;
         };
         Relationships: [
           {
@@ -587,6 +635,13 @@ export type Database = {
       /* No support for functions */
     };
     Enums: {
+      /** Quality of the file
+       * - low
+       * - medium
+       * - high
+       * - original
+       */
+      file_quality: "low" | "medium" | "high" | "original";
       /** Types of notifications that can be sent to users
        * - comment: Notification for new comments
        * - vote: Notification for votes on reports
