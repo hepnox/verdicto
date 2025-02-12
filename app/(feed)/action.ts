@@ -112,3 +112,9 @@ export async function addComment(
 function generateUuid() {
   return crypto.randomUUID();
 }
+
+export async function getReportCount() {
+  const supabase = await createClient();
+  const reportCount = (await supabase.from("reports").select("count", {count: 'exact'}).maybeSingle()).count;
+  return reportCount;
+}

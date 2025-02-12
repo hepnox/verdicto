@@ -1,22 +1,19 @@
-import { PlusCircledIcon } from "@radix-ui/react-icons";
 import { Metadata } from "next";
-import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { AlbumArtwork, madeForYouAlbums } from "@/components/album-artwork";
 import { PodcastEmptyPlaceholder } from "@/components/podcast-empy-placeholder";
+import { getReportCount } from "./action";
 import { Reports } from "./component";
-
 export const metadata: Metadata = {
   title: "Reports Dashboard",
   description: "Comprehensive reporting and analytics dashboard.",
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const reportCount = await getReportCount();
   return (
     <div className="bg-background">
       <div className="grid lg:grid-cols-5">
@@ -28,11 +25,14 @@ export default function HomePage() {
                 <TabsList>
                   <TabsTrigger value="reports" className="relative">
                     Reports
+                    {/* <div className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">
+                      {reportCount}
+                    </div> */}
                   </TabsTrigger>
                   <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                  <TabsTrigger value="insights" disabled>
+                  {/* <TabsTrigger value="insights" disabled>
                     Insights
-                  </TabsTrigger>
+                  </TabsTrigger> */}
                 </TabsList>
                 {/* <div className="ml-auto mr-4">
                   <Button>
@@ -62,7 +62,7 @@ export default function HomePage() {
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </div>
-                <div className="mt-6 space-y-1">
+                {/* <div className="mt-6 space-y-1">
                   <h2 className="text-2xl font-semibold tracking-tight">
                     Recommended Actions
                   </h2>
@@ -70,8 +70,8 @@ export default function HomePage() {
                     Suggested follow-ups based on recent reports.
                   </p>
                 </div>
-                <Separator className="my-4" />
-                <div className="relative">
+                <Separator className="my-4" /> */}
+                {/* <div className="relative">
                   <ScrollArea>
                     <div className="flex space-x-4 pb-4">
                       {madeForYouAlbums.map((album) => (
@@ -87,7 +87,7 @@ export default function HomePage() {
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
-                </div>
+                </div> */}
               </TabsContent>
               <TabsContent
                 value="analytics"
@@ -104,7 +104,10 @@ export default function HomePage() {
                   </div>
                 </div>
                 <Separator className="my-4" />
-                <PodcastEmptyPlaceholder />
+                {/* <PodcastEmptyPlaceholder /> */}
+                <div className="flex justify-center items-center py-12">
+                  <div className="text-6xl font-bold">{reportCount}</div>
+                </div>
               </TabsContent>
             </Tabs>
           </div>
