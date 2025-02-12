@@ -1,9 +1,42 @@
 import { Ollama } from "ollama";
 
 export function createAiClient() {
-  return new Ollama({
-    host: "https://ai.yfbd.org",
-  });
+  return {
+    generate: async ({
+      model,
+      prompt,
+      images,
+      stream,
+    }: {
+      model: string;
+      prompt: string;
+      images: string[];
+      stream: boolean;
+    }) => {
+      const response = await fetch("https://ai.yfbd.org/api/generate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          prompt,
+          images,
+          stream,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      if (stream) {
+        return response.body;
+      }
+
+      return response.json();
+    },
+  };
 }
 
 export async function getImageContext(files: File[]) {

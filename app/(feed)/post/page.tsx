@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { getImageContext } from "@/lib/ai";
 import { TablesInsert } from "@/lib/database.types";
 import { createReport } from "@/lib/report";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,32 @@ export default function CreatePostPage() {
   const router = useRouter();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
+  const [description, setDescription] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(selectedFiles);
+
+    // Get first image file for AI description
+    const imageFiles = selectedFiles.filter(file => file.type.startsWith('image/'));
+    if (imageFiles.length > 0) {
+      try {
+        setAiLoading(true);
+        // Use getImageContext to get AI description
+        const response = await getImageContext(imageFiles);
+        let aiDescription = "";
+        for await (const chunk of response) {
+          aiDescription += chunk.response;
+        }
+        setDescription(aiDescription);
+      } catch (error) {
+        console.error('Error getting AI description:', error);
+      } finally {
+        setAiLoading(false);
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -59,7 +86,15 @@ export default function CreatePostPage() {
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea id="description" name="description" required />
+            <Textarea
+              id="description"
+              name="description"
+              required
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder={aiLoading ? "Getting AI description..." : "Enter description"}
+              disabled={aiLoading}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -90,11 +125,11 @@ export default function CreatePostPage() {
               type="file"
               multiple
               accept="image/*,video/*"
-              onChange={(e) => setFiles(Array.from(e.target.files || []))}
+              onChange={handleFileChange}
             />
           </div>
 
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading || aiLoading}>
             {loading ? "Creating..." : "Create Post"}
           </Button>
         </form>
