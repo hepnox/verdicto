@@ -12,7 +12,7 @@ export async function getCrimeReports() {
         *,
         report_files(*, files(*)),
         report_reactions(type, user_id),
-        report_comments(*)
+        report_comments(*, users(full_name))
     `,
     )
     .order("created_at", { ascending: false });
@@ -54,6 +54,7 @@ export async function toggleReaction(
   } else {
     // Create new reaction
     await supabase.from("report_reactions").insert({
+      id: generateUuid(),
       report_id: reportId,
       user_id: userId,
       type: reactionType,
@@ -82,7 +83,6 @@ export async function addComment(
   reportId: string,
   userId: string,
   content: string,
-  fileUrl?: string,
 ) {
   const supabase = await createClient();
 
@@ -90,6 +90,7 @@ export async function addComment(
   const { data: comment, error: commentError } = await supabase
     .from("report_comments")
     .insert({
+      id: generateUuid(),
       report_id: reportId,
       user_id: userId,
       content: content,
@@ -98,33 +99,16 @@ export async function addComment(
     .select()
     .single();
 
+  console.log(commentError);
+
   if (commentError || !comment) {
     return { success: false, error: commentError?.message };
   }
 
-  // If there's a file, handle it
-  if (fileUrl) {
-    // First create file record
-    const { data: file, error: fileError } = await supabase
-      .from("files")
-      .insert({
-        url: fileUrl,
-        user_id: userId,
-      })
-      .select()
-      .single();
-
-    if (fileError || !file) {
-      return { success: false, error: fileError?.message };
-    }
-
-    // Then create comment_files association
-    await supabase.from("comment_files").insert({
-      comment_id: comment.id,
-      file_id: file.id,
-    });
-  }
-
   revalidatePath("/feed");
   return { success: true, comment };
+}
+
+function generateUuid() {
+  return crypto.randomUUID();
 }

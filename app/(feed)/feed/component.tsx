@@ -46,6 +46,7 @@ export function PostCard({
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
   const [localReactions, setLocalReactions] = useState(reactions);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setLocalReactions(reactions);
@@ -101,8 +102,8 @@ export function PostCard({
 
     try {
       await addComment(post.id, userId, comment);
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
       setComment("");
-      setShowCommentInput(false);
     } catch (error) {
       console.error("Failed to add comment:", error);
     }
@@ -200,13 +201,43 @@ export function PostCard({
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               className="w-full"
+              required
+              minLength={1}
+              maxLength={500}
             />
-            <div className="flex justify-between items-center">
-              <Input type="file" id="file-upload" className="w-1/2" />
-              <Button type="submit">Post Comment</Button>
+            <div className="flex justify-end items-center gap-2">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowCommentInput(false);
+                  setComment("");
+                }}
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                disabled={!comment.trim()}
+              >
+                Post Comment
+              </Button>
             </div>
           </form>
         )}
+        <div className="space-y-4 w-full">
+          {post.report_comments?.map((comment) => (
+            <div key={comment.id} className="border rounded-lg p-4">
+              <div className="flex justify-between items-start mb-2">
+                <p className="text-sm font-medium">{comment?.users?.full_name || "Anonymous User"}</p>
+                <span className="text-xs text-gray-500">
+                  {format(new Date(comment.created_at), "PPp")}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">{comment.content}</p>
+            </div>
+          ))}
+        </div>
       </CardFooter>
     </Card>
   );

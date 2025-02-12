@@ -18,7 +18,7 @@ const nextConfig: NextConfig = {
       },
       {
         hostname: "cimbxxgcefbtbwxnymhn.supabase.co",
-      },
+      }
     ],
   },
 };
