@@ -8,9 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { getImageContext } from "@/lib/ai";
 import { TablesInsert } from "@/lib/database.types";
 import { uploadFile } from "@/lib/file";
-import { createReport } from "@/lib/report";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createReport } from "./action";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -45,16 +45,16 @@ export default function CreatePostPage() {
         if (response) {
           const reader = response.getReader();
           const decoder = new TextDecoder();
-      
+
           try {
             while (true) {
               const { done, value } = await reader.read();
               if (done) break;
-              
+
               const chunk = decoder.decode(value);
               // Split by newlines since each JSON object is separated by \n
               const jsonStrings = chunk.split('\n');
-              
+
               for (const jsonString of jsonStrings) {
                 if (jsonString.trim()) {  // Only parse non-empty strings
                   try {
@@ -105,9 +105,9 @@ export default function CreatePostPage() {
           const uploadedImage = await uploadFile(file, 'images');
           return uploadedImage.signedUrl;
         }));
-       const createdReport = await createReport({
+        const createdReport = await createReport({
           data: formData,
-          files: uploadedImages.map(image => ({url: image, user_id: formData.user_id})),
+          files: uploadedImages.map(image => ({ url: image, user_id: formData.user_id })),
         });
 
         setReport(createdReport.report);
