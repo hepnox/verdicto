@@ -1,5 +1,6 @@
 import { randomInt } from "crypto";
 import supabase from "./supabase";
+
 export async function sendSMS(
   phoneNumber: string,
   message: string,
@@ -26,13 +27,13 @@ export async function sendSMS(
   }
 }
 
-export async function generateOTP(email: string): Promise<string> {
+export async function generateOTP(phoneNumber: string): Promise<string> {
   // Generate a 6-digit OTP
   const otp = randomInt(100000, 999999).toString();
 
   // Store OTP in database with 5 minute expiry
   const { error } = await supabase.from("otps").insert({
-    email,
+    phone_number: phoneNumber,
     code: otp,
     expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
   });
@@ -41,14 +42,22 @@ export async function generateOTP(email: string): Promise<string> {
     throw new Error("Failed to store OTP");
   }
 
+  // Send OTP via SMS
+  const message = `Your verification code is: ${otp}`;
+  const sent = await sendSMS(phoneNumber, message);
+
+  if (!sent) {
+    throw new Error("Failed to send OTP via SMS");
+  }
+
   return otp;
 }
 
-export async function verifyOTP(email: string, code: string): Promise<boolean> {
+export async function verifyOTP(phoneNumber: string, code: string): Promise<boolean> {
   const { data, error } = await supabase
     .from("otps")
     .select()
-    .eq("email", email)
+    .eq("phone_number", phoneNumber)
     .eq("code", code)
     .gt("expires_at", new Date().toISOString())
     .single();
@@ -58,7 +67,7 @@ export async function verifyOTP(email: string, code: string): Promise<boolean> {
   }
 
   // Delete the used OTP
-  await supabase.from("otps").delete().eq("email", email).eq("code", code);
+  await supabase.from("otps").delete().eq("phone_number", phoneNumber).eq("code", code);
 
   return true;
 }
