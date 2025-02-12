@@ -21,6 +21,8 @@ import {
   ThumbsUp,
   ThumbsDown,
   MessageSquare,
+  AlertTriangle,
+  XCircle,
 } from "lucide-react";
 import { toggleReaction, addComment, getCrimeReports } from "../action";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -120,17 +122,32 @@ export function PostCard({
   const downvotes = localReactions.filter((r) => r.type === "downvote").length;
   const userReaction = localReactions.find((r) => r.user_id === userId)?.type;
 
+  const score = getTruthyScore(post.description);
+
   return (
     <Card className="w-full mx-auto shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{processTitle(post.title)}</span>
           {upvotes > 2 && upvotes > downvotes && (
-            <Badge className="ml-2 p-2 text-base bg-green-100 text-green-800">
-              <CheckCircle className="size-6 mr-1" />
+            <Badge className="ml-2 py-2 px-3 text-base bg-green-100 text-green-800">
+              <CheckCircle className="size-5 mr-1" />
               Verified
             </Badge>
           )}
+          {score === null ? null : score > 7 ? (
+            <div className="flex justify-center bg-green-100 rounded-full p-2">
+              <CheckCircle color="green" className="size-5" />
+            </div>
+          ) : score > 5 ? (
+            <div className="flex justify-center bg-yellow-100 rounded-full p-2">
+              <AlertTriangle color="orange" className="size-5" />
+            </div>
+          ) : score >= 0 ? (
+            <div className="flex justify-center bg-red-100 rounded-full p-2">
+              <AlertTriangle color="red" className="size-5" />
+            </div>
+          ) : null}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -293,14 +310,14 @@ export function CrimesFeed() {
 const ContactList = (props: { content: string }) => {
   try {
     // Handle empty/invalid content
-    if (!props.content || typeof props.content !== 'string') {
-      console.warn('Invalid content provided to BadgeRender');
+    if (!props.content || typeof props.content !== "string") {
+      console.warn("Invalid content provided to BadgeRender");
       return null;
     }
 
     const matches = Object.keys(emergencyContacts);
     if (!matches || matches.length === 0) {
-      console.warn('No emergency contacts found');
+      console.warn("No emergency contacts found");
       return null;
     }
 
@@ -308,7 +325,7 @@ const ContactList = (props: { content: string }) => {
       try {
         return props.content.toLowerCase().includes(match.toLowerCase());
       } catch (e) {
-        console.error('Error matching content:', e);
+        console.error("Error matching content:", e);
         return false;
       }
     });
@@ -326,7 +343,7 @@ const ContactList = (props: { content: string }) => {
     }
 
     return (
-      <select 
+      <select
         className="w-full p-2 text-sm border rounded-md"
         onChange={(e) => {
           if (e.target.value) {
@@ -334,7 +351,9 @@ const ContactList = (props: { content: string }) => {
           }
         }}
       >
-        <option value="" disabled selected>Select {find.toLocaleLowerCase()} contact</option>
+        <option value="" disabled selected>
+          Select {find.toLocaleLowerCase()} contact
+        </option>
         {list.map((match, index) => {
           // Handle invalid match objects
           if (!match || !match.district || !match.phone) {
@@ -350,9 +369,22 @@ const ContactList = (props: { content: string }) => {
         })}
       </select>
     );
-
   } catch (error) {
-    console.error('Error in BadgeRender:', error);
+    console.error("Error in BadgeRender:", error);
     return null;
   }
 };
+
+function getTruthyScore(description: string) {
+  const lastLine = description.split("\n").pop();
+  if (!lastLine) return null;
+
+  const onlyNumbers = lastLine.replace(/[^0-9]/g, "");
+  const firstNumber = onlyNumbers.charAt(0);
+  if (!firstNumber) return null;
+
+  const number = parseInt(firstNumber);
+  if (isNaN(number)) return null;
+
+  return number;
+}
