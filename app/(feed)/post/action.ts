@@ -3,12 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { Tables, TablesInsert } from "../../../lib/database.types";
 import { uploadFile } from "../../../lib/file";
 import { downloadAndCompressImage } from "../../../lib/file.server";
-import supabase from "../../../lib/supabase";
 
 export async function createReport(args: {
   data: TablesInsert<"reports">;
   files: TablesInsert<"files">[];
 }) {
+  const supabase = await createClient();
   const userPreferences = await supabase
     .from("user_preferences")
     .select("*")

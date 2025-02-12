@@ -49,7 +49,7 @@ export const uploadFileToSupabase = async (
 };
 
 export const uploadFile = async (formData: FormData, folder: string) => {
-  const response = await fetch("/api/upload", {
+  const response = await fetch("/post", {
     method: "POST",
     body: formData,
   });
