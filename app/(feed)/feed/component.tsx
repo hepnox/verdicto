@@ -12,7 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import emergencyContacts from "../../../lib/emergency.json";
 import { Textarea } from "@/components/ui/textarea";
 import {
   CheckCircle,
@@ -167,7 +167,7 @@ export function PostCard({
           </div>
         </div>
         <div className="flex justify-between w-full">
-          <div className="flex space-x-2">
+          <div className="flex items-center space-x-2">
             <Button
               variant="outline"
               size="sm"
@@ -188,6 +188,7 @@ export function PostCard({
               <ThumbsDown className="w-4 h-4 mr-1" />
               {downvotes}
             </Button>
+            <ContactList content={post.description} />
           </div>
           <Button variant="outline" size="sm" onClick={toggleCommentInput}>
             <MessageSquare className="w-4 h-4 mr-1" />
@@ -274,3 +275,70 @@ export function CrimesFeed() {
     </div>
   );
 }
+
+const ContactList = (props: { content: string }) => {
+  try {
+    // Handle empty/invalid content
+    if (!props.content || typeof props.content !== 'string') {
+      console.warn('Invalid content provided to BadgeRender');
+      return null;
+    }
+
+    const matches = Object.keys(emergencyContacts);
+    if (!matches || matches.length === 0) {
+      console.warn('No emergency contacts found');
+      return null;
+    }
+
+    const find = matches.find((match) => {
+      try {
+        return props.content.toLowerCase().includes(match.toLowerCase());
+      } catch (e) {
+        console.error('Error matching content:', e);
+        return false;
+      }
+    });
+
+    // Handle no matches found
+    if (!find) {
+      return null;
+    }
+
+    const list = emergencyContacts[find as keyof typeof emergencyContacts];
+
+    // Handle invalid or empty list
+    if (!list || !Array.isArray(list) || list.length === 0) {
+      return null;
+    }
+
+    return (
+      <select 
+        className="w-full p-2 text-sm border rounded-md"
+        onChange={(e) => {
+          if (e.target.value) {
+            window.location.href = `tel:${e.target.value}`;
+          }
+        }}
+      >
+        <option value="" disabled selected>Select emergency contact</option>
+        {list.map((match, index) => {
+          // Handle invalid match objects
+          if (!match || !match.district || !match.phone) {
+            console.warn(`Invalid contact data at index ${index}`);
+            return null;
+          }
+
+          return (
+            <option key={index} value={match.phone}>
+              {match.district}: {match.phone}
+            </option>
+          );
+        })}
+      </select>
+    );
+
+  } catch (error) {
+    console.error('Error in BadgeRender:', error);
+    return null;
+  }
+};
