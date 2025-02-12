@@ -20,6 +20,19 @@ export default function CreatePostPage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [report, setReport] = useState<TablesInsert<"reports"> | undefined>();
   const [isStreaming, setIsStreaming] = useState(false);
+  const [selectedDivision, setSelectedDivision] = useState("");
+
+  // Add Bangladesh administrative data
+  const bangladeshData = {
+    "Dhaka": ["Dhaka", "Gazipur", "Narayanganj", "Tangail", "Kishoreganj", "Narsingdi", "Faridpur", "Gopalganj", "Madaripur", "Manikganj", "Munshiganj", "Rajbari", "Shariatpur"],
+    "Chittagong": ["Chittagong", "Cox's Bazar", "Bandarban", "Rangamati", "Khagrachari", "Feni", "Lakshmipur", "Comilla", "Noakhali", "Chandpur", "Brahmanbaria"],
+    "Rajshahi": ["Rajshahi", "Natore", "Naogaon", "Chapainawabganj", "Pabna", "Bogra", "Sirajganj", "Joypurhat"],
+    "Khulna": ["Khulna", "Bagerhat", "Satkhira", "Jessore", "Magura", "Jhenaidah", "Narail", "Kushtia", "Chuadanga", "Meherpur"],
+    "Barisal": ["Barisal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati", "Barguna"],
+    "Sylhet": ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
+    "Rangpur": ["Rangpur", "Gaibandha", "Nilphamari", "Kurigram", "Lalmonirhat", "Dinajpur", "Thakurgaon", "Panchagarh"],
+    "Mymensingh": ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"]
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
@@ -125,7 +138,7 @@ export default function CreatePostPage() {
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
-        <CardTitle>Create New Crime Report</CardTitle>
+        <CardTitle>New Report</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -144,8 +157,9 @@ export default function CreatePostPage() {
             <Textarea
               id="description"
               name="description"
+              rows={20}
               required
-              value={description}
+              value={description?.trim()}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={
                 aiLoading ? "Getting AI description..." : "Enter description"
@@ -157,12 +171,50 @@ export default function CreatePostPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="division">Division</Label>
-              <Input id="division" name="division" required />
+              <select
+                id="division"
+                name="division"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+                value={selectedDivision}
+                onChange={(e) => setSelectedDivision(e.target.value)}
+              >
+                <option value="">Select Division</option>
+                {Object.keys(bangladeshData).map((division) => (
+                  <option key={division} value={division}>
+                    {division}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label htmlFor="district">District</Label>
-              <Input id="district" name="district" required />
+              <select
+                id="district"
+                name="district"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+                disabled={!selectedDivision}
+              >
+                <option value="">Select District</option>
+                {selectedDivision &&
+                  bangladeshData[selectedDivision as keyof typeof bangladeshData].map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+              </select>
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="address">Full Address</Label>
+            <Input 
+              id="address" 
+              name="address" 
+              placeholder="Enter detailed address"
+              required 
+            />
           </div>
 
           <div>
