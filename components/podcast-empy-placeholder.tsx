@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
+import Link from "next/link"
 export function PodcastEmptyPlaceholder() {
   return (
     <div className="flex h-[450px] shrink-0 items-center justify-center rounded-md border border-dashed">
@@ -25,36 +25,39 @@ export function PodcastEmptyPlaceholder() {
           className="h-10 w-10 text-muted-foreground"
           viewBox="0 0 24 24"
         >
-          <circle cx="12" cy="11" r="1" />
-          <path d="M11 17a1 1 0 0 1 2 0c0 .5-.34 3-.5 4.5a.5.5 0 0 1-1 0c-.16-1.5-.5-4-.5-4.5ZM8 14a5 5 0 1 1 8 0" />
-          <path d="M17 18.5a9 9 0 1 0-10 0" />
+          <path d="M20 11.08V8l-6-6H6a2 2 0 0 0-2 2v16c0 1.1.9 2 2 2h12a2 2 0 0 0 2-2V11.08z" />
+          <path d="M14 3v5h5" />
+          <line x1="9" y1="13" x2="15" y2="13" />
+          <line x1="9" y1="17" x2="15" y2="17" />
         </svg>
 
-        <h3 className="mt-4 text-lg font-semibold">No episodes added</h3>
+        <h3 className="mt-4 text-lg font-semibold">No Crime Reports</h3>
         <p className="mb-4 mt-2 text-sm text-muted-foreground">
-          You have not added any podcasts. Add one below.
+          You haven&apos;t filed any crime reports yet. Add one below.
         </p>
         <Dialog>
-          <DialogTrigger asChild>
+          {/* <DialogTrigger asChild> */}
+          <Link href="/post">
             <Button size="sm" className="relative">
-              Add Podcast
+              File New Report
             </Button>
-          </DialogTrigger>
+          </Link>
+          {/* </DialogTrigger> */}
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add Podcast</DialogTitle>
+              <DialogTitle>File Crime Report</DialogTitle>
               <DialogDescription>
-                Copy and paste the podcast feed URL to import.
+                Enter the details of the incident to file a new report.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="url">Podcast URL</Label>
-                <Input id="url" placeholder="https://example.com/feed.xml" />
+                <Label htmlFor="incident">Incident Description</Label>
+                <Input id="incident" placeholder="Describe the incident..." />
               </div>
             </div>
             <DialogFooter>
-              <Button>Import Podcast</Button>
+              <Button>Submit Report</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
