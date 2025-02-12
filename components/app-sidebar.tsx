@@ -13,15 +13,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { NavMenus } from "@/constants/nav";
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { LayoutGrid, Play, Radio } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 // This is sample data.
 const data = {
@@ -33,7 +28,6 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { open } = useSidebar();
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -52,26 +46,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <div className={cn("pb-12")}>
-          <div className="space-y-4 py-4">
-            <div className={cn("transition-all", !open ? "" : "px-3 py-2")}>
-              <div className="space-y-1">
-                <Button variant="secondary" className="w-full justify-start">
-                  <Play className="mr-2 h-4 w-4" />
-                  Listen Now
-                </Button>
-                <Button variant="ghost" className="w-full justify-start">
-                  <LayoutGrid className="mr-2 h-4 w-4" />
-                  Browse
-                </Button>
-                <Button variant="ghost" className="w-full justify-start">
-                  <Radio className="mr-2 h-4 w-4" />
-                  Radio
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <NavMain items={NavMenus} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

@@ -9,6 +9,7 @@ export const TopBar = () => {
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
+        <BreadcrumbNav />
       </div>
       <CreatePostButton />
     </div>
