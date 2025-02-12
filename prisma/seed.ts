@@ -1,25 +1,30 @@
-import { PrismaClient, UserRole } from "@prisma/client";
+import { PrismaClient, user_role, file_quality } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 
 const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
-  await prisma.vote.deleteMany();
-  await prisma.comment.deleteMany();
-  await prisma.crimeReport.deleteMany();
-  await prisma.refreshToken.deleteMany();
-  await prisma.user.deleteMany();
+  await prisma.report_reactions.deleteMany();
+  await prisma.report_comments.deleteMany();
+  await prisma.report_files.deleteMany();
+  await prisma.files.deleteMany();
+  await prisma.reports.deleteMany();
+  await prisma.geolocations.deleteMany();
+  await prisma.user_preferences.deleteMany();
+  await prisma.notifications.deleteMany();
+  await prisma.users.deleteMany();
 
   // Create admin user
-  const admin = await prisma.user.create({
+  const admin = await prisma.users.create({
     data: {
       email: "admin@verdicto.com",
-      phoneNumber: "+8801700000000",
+      phone: "+8801700000000",
       password: "hashed_admin_password", // In production, use proper password hashing
-      role: UserRole.ADMIN,
-      profileImage: faker.image.avatar(),
-      bio: faker.person.bio(),
+      role: user_role.admin,
+      avatar_url: faker.image.avatar(),
+      status: "active",
+      full_name: "Admin",
     },
   });
 
@@ -28,69 +33,86 @@ async function main() {
     Array(5)
       .fill(null)
       .map(async () => {
-        return prisma.user.create({
+        return prisma.users.create({
           data: {
+            full_name: faker.person.fullName(),
             email: faker.internet.email(),
-            phoneNumber: faker.phone.number({ style: "international" }),
+            phone: faker.phone.number(),
             password: "hashed_password", // In production, use proper password hashing
-            role: UserRole.VERIFIED,
-            profileImage: faker.image.avatar(),
-            bio: faker.person.bio(),
+            role: user_role.member,
+            avatar_url: faker.image.avatar(),
+            status: "active",
           },
         });
       }),
   );
 
-  // Create crime reports
-  const divisions = ["Dhaka", "Chittagong", "Rajshahi", "Khulna", "Sylhet"];
-  const districts = ["City Center", "North", "South", "East", "West"];
-
   for (const user of [...users, admin]) {
     const numReports = faker.number.int({ min: 1, max: 3 });
 
     for (let i = 0; i < numReports; i++) {
-      const report = await prisma.crimeReport.create({
+      // Create geolocation first
+      const geolocation = await prisma.geolocations.create({
         data: {
-          title: faker.lorem.sentence(),
-          description: faker.lorem.paragraphs(),
-          aiDescription: faker.lorem.paragraph(),
-          division: faker.helpers.arrayElement(divisions),
-          district: faker.helpers.arrayElement(districts),
-          images: Array(faker.number.int({ min: 1, max: 4 }))
-            .fill(null)
-            .map(() => faker.image.url()),
-          video: faker.helpers.maybe(() => faker.internet.url()),
-          location: {
-            latitude: faker.location.latitude(),
-            longitude: faker.location.longitude(),
-          },
-          crimeTime: faker.date.recent(),
-          verificationScore: faker.number.int({ min: -10, max: 50 }),
-          authorId: user.id,
+          latitude: faker.location.latitude(),
+          longitude: faker.location.longitude(),
         },
       });
 
-      // Add comments to each report
-      const numComments = faker.number.int({ min: 0, max: 5 });
-      for (let j = 0; j < numComments; j++) {
-        await prisma.comment.create({
+      const report = await prisma.reports.create({
+        data: {
+          title: faker.lorem.sentence(),
+          description: faker.lorem.paragraphs(),
+          incident_at: faker.date.recent(),
+          user_id: user.id,
+          golocation_id: geolocation.id,
+        },
+      });
+
+      // Create files and link them to report
+      const numFiles = faker.number.int({ min: 1, max: 4 });
+      for (let f = 0; f < numFiles; f++) {
+        const file = await prisma.files.create({
           data: {
-            content: faker.lorem.paragraph(),
-            proof: faker.image.url(),
-            authorId: faker.helpers.arrayElement(users).id,
-            reportId: report.id,
+            url: faker.image.url(),
+            user_id: user.id,
+          },
+        });
+
+        await prisma.report_files.create({
+          data: {
+            report_id: report.id,
+            file_id: file.id,
+            quality: faker.helpers.arrayElement([
+              file_quality.low,
+              file_quality.medium,
+              file_quality.high,
+              file_quality.original,
+            ]),
           },
         });
       }
 
-      // Add votes to each report
-      for (const voter of users) {
+      // Add comments to each report
+      const numComments = faker.number.int({ min: 0, max: 5 });
+      for (let j = 0; j < numComments; j++) {
+        await prisma.report_comments.create({
+          data: {
+            content: faker.lorem.paragraph(),
+            user_id: faker.helpers.arrayElement(users).id,
+            report_id: report.id,
+          },
+        });
+      }
+
+      // Add reactions to each report
+      for (const reactor of users) {
         if (faker.number.int({ min: 0, max: 1 })) {
-          await prisma.vote.create({
+          await prisma.report_reactions.create({
             data: {
-              value: faker.helpers.arrayElement([-1, 1]),
-              userId: voter.id,
-              reportId: report.id,
+              type: faker.helpers.arrayElement(['upvote', 'downvote']),
+              user_id: reactor.id,
+              report_id: report.id,
             },
           });
         }

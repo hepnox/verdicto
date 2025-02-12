@@ -125,6 +125,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      /** Simple notification model for user alerts */
+      notification: {
+        Row: {
+          /** When the notification was created */
+          created_at: string;
+          /** Unique identifier for the notification */
+          id: string;
+          /** Notification message */
+          message: string;
+          /** Whether the notification has been read */
+          read: boolean;
+          /** Notification title */
+          title: string;
+          /** User who receives the notification */
+          user_id: string;
+        };
+        Insert: {
+          /** When the notification was created */
+          created_at?: string;
+          /** Unique identifier for the notification */
+          id?: string;
+          /** Notification message */
+          message: string;
+          /** Whether the notification has been read */
+          read?: boolean;
+          /** Notification title */
+          title: string;
+          /** User who receives the notification */
+          user_id: string;
+        };
+        Update: {
+          /** When the notification was created */
+          created_at?: string;
+          /** Unique identifier for the notification */
+          id?: string;
+          /** Notification message */
+          message?: string;
+          /** Whether the notification has been read */
+          read?: boolean;
+          /** Notification title */
+          title?: string;
+          /** User who receives the notification */
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notificationTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** User notifications */
       notifications: {
         Row: {
@@ -551,6 +605,8 @@ export type Database = {
           created_at: string;
           /** User's email address, must be unique */
           email: string;
+          /** FCM token */
+          fcm_token: string | null;
           /** User's full name */
           full_name: string;
           /** Unique identifier for the user */
@@ -580,6 +636,8 @@ export type Database = {
           created_at?: string;
           /** User's email address, must be unique */
           email: string;
+          /** FCM token */
+          fcm_token?: string | null;
           /** User's full name */
           full_name: string;
           /** Unique identifier for the user */
@@ -609,6 +667,8 @@ export type Database = {
           created_at?: string;
           /** User's email address, must be unique */
           email?: string;
+          /** FCM token */
+          fcm_token?: string | null;
           /** User's full name */
           full_name?: string;
           /** Unique identifier for the user */

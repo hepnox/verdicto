@@ -49,6 +49,8 @@ model users {
   status     user_status @default(active)
   /// URL to user's profile picture
   avatar_url String
+  /// FCM token
+  fcm_token String?
 
   /// Timestamp when the user account was created
   created_at DateTime @default(now())
@@ -66,6 +68,7 @@ model users {
   // Indexes
   @@index([created_at, updated_at])
   @@index([email, phone, password])
+  notification notification[]
 }
 
 /// Incident reports submitted by users
@@ -296,5 +299,28 @@ model geolocations {
   reports    reports[]
 
   // Indexes
+  @@index([created_at])
+}
+
+/// Simple notification model for user alerts
+model notification {
+  /// Unique identifier for the notification
+  id String @id @default(uuid()) @db.Uuid
+  /// User who receives the notification
+  user_id String @db.Uuid
+  /// Notification title
+  title String
+  /// Notification message
+  message String
+  /// Whether the notification has been read
+  read Boolean @default(false)
+  /// When the notification was created
+  created_at DateTime @default(now())
+
+  // Relations
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([user_id])
   @@index([created_at])
 }
