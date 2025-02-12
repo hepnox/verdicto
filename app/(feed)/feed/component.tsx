@@ -24,76 +24,47 @@ import {
 } from "lucide-react";
 import { toggleReaction, addComment, getCrimeReports } from "../action";
 import { useQuery } from "@tanstack/react-query";
-
-interface PostCardProps {
-  title: string;
-  description: string;
-  locations: string[];
-  images: string[];
-  video?: string;
-  postTime: Date;
-  crimeTime: Date;
-  isVerified: boolean;
-  width?: "sm" | "md" | "lg" | "xl" | "full";
-  id: string;
-  userId: string;
-  reactions?: Array<{
-    type: 'upvote' | 'downvote';
-    user_id: string;
-  }>;
-}
+import { Tables } from "@/lib/database.types";
 
 export function PostCard({
-  title,
-  description,
-  locations,
-  images,
-  video,
-  postTime,
-  crimeTime,
-  isVerified,
-  width = "md",
-  id,
-  userId,
+  post,
   reactions = [],
-}: PostCardProps) {
-  const upvotes = reactions.filter(r => r.type === 'upvote').length;
-  const downvotes = reactions.filter(r => r.type === 'downvote').length;
-  const userReaction = reactions.find(r => r.user_id === userId)?.type;
+  userId,
+}: {
+  post: Awaited<ReturnType<Awaited<typeof getCrimeReports>>>[number];
+  reactions: Array<{ type: "upvote" | "downvote"; user_id: string }>;
+  userId: string;
+}) {
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
 
-  const widthClasses = {
-    sm: "w-full max-w-sm",
-    md: "w-full max-w-md",
-    lg: "w-full max-w-lg",
-    xl: "w-full max-w-xl",
-    full: "w-full",
-  };
+  const upvotes = reactions.filter((r) => r.type === "upvote").length;
+  const downvotes = reactions.filter((r) => r.type === "downvote").length;
+  const userReaction = reactions.find((r) => r.user_id === userId)?.type;
 
   const handleUpvote = async () => {
-    await toggleReaction(id, userId, 'upvote');
+    await toggleReaction(post.id, userId, "upvote");
   };
 
   const handleDownvote = async () => {
-    await toggleReaction(id, userId, 'downvote');
+    await toggleReaction(post.id, userId, "downvote");
   };
 
   const toggleCommentInput = () => setShowCommentInput((prev) => !prev);
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addComment(id, userId, comment);
+    await addComment(post.id, userId, comment);
     setComment("");
     setShowCommentInput(false);
   };
 
   return (
-    <Card className={`${widthClasses[width]} mx-auto shadow-md`}>
+    <Card className="w-full mx-auto shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{title}</span>
-          {isVerified && (
+          <span>{post.title}</span>
+          {post.verified && (
             <Badge variant="secondary" className="ml-2">
               <CheckCircle className="w-4 h-4 mr-1" />
               Verified
@@ -103,74 +74,60 @@ export function PostCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative aspect-video">
-          {video ? (
-            <video
-              src={video}
-              controls
-              className="w-full h-full object-cover rounded-md"
+          {post.report_files[0].files ? (
+            <Image
+              src={post.report_files[0].files.url}
+              alt={post.title}
+              layout="fill"
+              objectFit="cover"
+              className="rounded-md"
             />
           ) : (
             <Image
-              src={images[0] || "/placeholder.svg"}
-              alt={title}
+              src="/placeholder.svg"
+              alt="Placeholder"
               layout="fill"
               objectFit="cover"
               className="rounded-md"
             />
           )}
         </div>
-        {images.length > 1 && (
-          <div className="flex space-x-2 overflow-x-auto py-2">
-            {images.slice(1).map((image, index) => (
-              <Image
-                key={index}
-                src={image || "/placeholder.svg"}
-                alt={`Additional image ${index + 1}`}
-                width={100}
-                height={100}
-                objectFit="cover"
-                className="rounded-md"
-              />
-            ))}
-          </div>
+
+        <p className="text-sm text-gray-600">{post.description}</p>
+        {post.golocation_id && (
+          <Badge variant="outline" className="flex items-center">
+            <MapPin className="w-3 h-3 mr-1" />
+            {post.golocation_id}
+          </Badge>
         )}
-        <p className="text-sm text-gray-600">{description}</p>
-        <div className="flex flex-wrap gap-2">
-          {locations.map((location, index) => (
-            <Badge key={index} variant="outline" className="flex items-center">
-              <MapPin className="w-3 h-3 mr-1" />
-              {location}
-            </Badge>
-          ))}
-        </div>
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
         <div className="flex justify-between text-sm text-gray-500 w-full">
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />
-            <span>Posted: {format(postTime, "PPp")}</span>
+            <span>Posted: {format(new Date(post.created_at), "PPp")}</span>
           </div>
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />
-            <span>Crime: {format(crimeTime, "PPp")}</span>
+            <span>Incident: {format(new Date(post.incident_at), "PPp")}</span>
           </div>
         </div>
         <div className="flex justify-between w-full">
           <div className="flex space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleUpvote}
-              className={userReaction === 'upvote' ? 'bg-green-100' : ''}
+              className={userReaction === "upvote" ? "bg-green-100" : ""}
             >
               <ThumbsUp className="w-4 h-4 mr-1" />
               {upvotes}
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleDownvote}
-              className={userReaction === 'downvote' ? 'bg-red-100' : ''}
+              className={userReaction === "downvote" ? "bg-red-100" : ""}
             >
               <ThumbsDown className="w-4 h-4 mr-1" />
               {downvotes}
@@ -200,25 +157,32 @@ export function PostCard({
   );
 }
 
+export function CrimesFeed() {
+  const reportsQuery = useQuery({
+    queryKey: ["reports"],
+    queryFn: getCrimeReports,
+  });
 
-export  function Crimes() {
-    const reportsQuery = useQuery({
-      queryKey: ['reports'],
-      queryFn: getCrimeReports
-  })
-  
-  if (reportsQuery.isLoading) return <div>Loading...</div>
-  if (reportsQuery.isError) return <div>Error: {reportsQuery.error.message}</div>
-  
+  if (reportsQuery.isLoading) return <div>Loading...</div>;
+  if (reportsQuery.isError)
+    return <div>Error: {reportsQuery.error.message}</div>;
+
   const reports = reportsQuery.data;
-  console.log(reports);
-    return (
- 
-        <div className="space-y-6">
-          {reports?.map((post) => (
-            <PostCard key={post.id} {...post} width="full" />
-          ))}
-        </div>
 
-    );
+  if (!reports || reports.length === 0) {
+    return <div>No reports found</div>;
   }
+
+  return (
+    <div className="space-y-6">
+      {reports.map((post) => (
+        <PostCard
+          key={post.id}
+          post={post}
+          reactions={[]}
+          userId={post.user_id ?? ""}
+        />
+      ))}
+    </div>
+  );
+}
