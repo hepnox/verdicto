@@ -2,24 +2,30 @@
 import { createClient } from "@/lib/supabase/server";
 import { Tables, TablesInsert } from "../../../lib/database.types";
 import { uploadFileToSupabase } from "../../../lib/file";
-
 export async function createReport(args: {
   data: TablesInsert<"reports">;
   location?: TablesInsert<"geolocations">;
   files: File[];
 }) {
   const supabase = await createClient();
+  console.log(args)
   let locationId = args.location?.id ?? undefined;
-  if (!locationId && args.location) {
-  const createdLocation = await supabase
-    .from("geolocations")
-    .insert({
-      latitude: args.location.latitude,
-      longitude: args.location.longitude,
-      created_at: new Date().toISOString(),
-    })
-    .select()
-    .single();
+  if (
+    !locationId &&
+    args.location &&
+    args.location.latitude &&
+    args.location.longitude
+  ) {
+    const createdLocation = await supabase
+      .from("geolocations")
+      .insert({
+        id: generateUuid(),
+        latitude: args.location.latitude,
+        longitude: args.location.longitude,
+        created_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
     if (createdLocation.error) throw new Error(createdLocation.error.message);
     if (createdLocation.data) locationId = createdLocation.data.id;
@@ -34,7 +40,10 @@ export async function createReport(args: {
   // Download and upload the compressed image without watermark
   const compressedImages = await Promise.all(
     args.files.map(async (file) => {
-      const uploadedCompressedImage = await uploadFileToSupabase(file, "images");
+      const uploadedCompressedImage = await uploadFileToSupabase(
+        file,
+        "images",
+      );
       return uploadedCompressedImage.signedUrl;
     }),
   );
@@ -51,20 +60,21 @@ export async function createReport(args: {
 
   if (createdFiles.error) throw new Error(createdFiles.error.message);
 
+  // @ts-expect-error: TODO: fix this
   delete args.data.district;
+  // @ts-expect-error: TODO: fix this
   delete args.data.division;
   if (!args.data.id) delete args.data.id;
   const createdReport = await supabase
     .from("reports")
     .insert({
+      id: generateUuid(),
       title: args.data.title,
       description: args.data.description,
-      golocation_id: locationId ?? "",
       incident_at: args.data.incident_at,
       user_id: args.data.user_id,
       updated_at: new Date().toISOString(),
       created_at: new Date().toISOString(),
-
     })
     .select()
     .single();
@@ -104,4 +114,9 @@ export async function updateReport(args: {
     .single();
   if (updatedReport.error) throw new Error(updatedReport.error.message);
   return updatedReport.data;
+}
+
+
+function generateUuid() {
+  return crypto.randomUUID();
 }

@@ -68,7 +68,7 @@ function ReportCard({
         <ContextMenuTrigger>
           <div className="overflow-hidden rounded-md h-[300px] w-[200px]">
             <Image
-              src={report.report_files[0].files.url}
+              src={report.report_files?.[0]?.files?.url ?? 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSbBApMom33VfSzhEoxYI_xETxaPdmPa0tmbg&s'}
               alt={report.title}
               width={width}
               height={height}

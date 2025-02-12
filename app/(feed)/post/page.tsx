@@ -11,6 +11,7 @@ import { TablesInsert } from "@/lib/database.types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createReport } from "./action";
+import { useAuth } from "@/hooks/use-auth";
 
 interface BarikoiPlace {
   id: number;
@@ -24,6 +25,7 @@ interface BarikoiPlace {
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const auth = useAuth();
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
@@ -182,6 +184,9 @@ export default function CreatePostPage() {
     }
   };
 
+  if (!auth.user) {
+    return <div>Loading...</div>;
+  }
   return (
     <Card className="w-full max-w-3xl mx-auto">
       <CardHeader>
@@ -192,7 +197,7 @@ export default function CreatePostPage() {
           <input
             type="hidden"
             name="user_id"
-            value={"622593a9-5df6-4007-a73f-7baa821b06cb"}
+            value={auth.user.id}
           />
           <div>
             <Label htmlFor="title">Title</Label>
