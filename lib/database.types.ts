@@ -469,6 +469,8 @@ export type Database = {
           /** Timestamp when the report was last updated */
           updated_at: string;
           user_id: string;
+          /** Verification status of the report */
+          verified: boolean;
         };
         Insert: {
           /** Timestamp when the report was created */
@@ -486,6 +488,8 @@ export type Database = {
           /** Timestamp when the report was last updated */
           updated_at: string;
           user_id: string;
+          /** Verification status of the report */
+          verified?: boolean;
         };
         Update: {
           /** Timestamp when the report was created */
@@ -503,6 +507,8 @@ export type Database = {
           /** Timestamp when the report was last updated */
           updated_at?: string;
           user_id?: string;
+          /** Verification status of the report */
+          verified?: boolean;
         };
         Relationships: [
           {
