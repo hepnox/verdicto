@@ -63,7 +63,7 @@ export async function getImageContext(files: File[]) {
 
   const response = await ai.generate({
     model: "llava:7b",
-    prompt: "Describe this image in detail",
+    prompt: "Analyze this scene and provide: 1) A detailed description of what is happening in the scene 2) Which emergency service(s) should respond with one (Police, Fire Service, or Ambulance) 3) A severity rating from 1-10, just a number",
     images: base64s,
     stream: true,
   });
