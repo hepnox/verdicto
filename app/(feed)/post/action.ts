@@ -52,6 +52,7 @@ export async function createReport(args: {
     .from("files")
     .insert(
       compressedImages.map((image) => ({
+        id: generateUuid(),
         url: image,
         user_id: args.data.user_id,
       })),
@@ -83,6 +84,7 @@ export async function createReport(args: {
 
   const reportFiles: TablesInsert<"report_files">[] = createdFiles.data.map(
     (file) => ({
+      id: generateUuid(),
       report_id: createdReport.data.id,
       file_id: file.id,
       quality: userPreferences.data?.image_quality ?? "low",
