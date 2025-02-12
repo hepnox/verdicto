@@ -19,8 +19,8 @@ export default function RootLayout({
     <html lang="en">
       <body className={`antialiased`}>
         <QueryProvider>
-          <SubscribeNotification />
-          <ServiceWorker />
+          {/* <SubscribeNotification />
+          <ServiceWorker /> */}
           {children}
           <Toaster />
         </QueryProvider>
