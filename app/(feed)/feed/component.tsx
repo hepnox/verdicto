@@ -25,6 +25,7 @@ import {
 import { toggleReaction, addComment, getCrimeReports } from "../action";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tables } from "@/lib/database.types";
+import { useAuth } from "@/hooks/use-auth";
 
 type ReactionState = {
   upvotes: number;
@@ -41,47 +42,54 @@ export function PostCard({
   reactions: Array<{ type: "upvote" | "downvote"; user_id: string }>;
   userId: string;
 }) {
-  const queryClient = useQueryClient();
+  const [isLoading, setIsLoading] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
-  const [reactionState, setReactionState] = useState<ReactionState>({
-    upvotes: reactions.filter((r) => r.type === "upvote").length,
-    downvotes: reactions.filter((r) => r.type === "downvote").length,
-    userReaction: reactions.find((r) => r.user_id === userId)?.type,
-  });
+  const [localReactions, setLocalReactions] = useState(reactions);
 
-  // Update local state when reactions prop changes
   useEffect(() => {
-    setReactionState({
-      upvotes: reactions.filter((r) => r.type === "upvote").length,
-      downvotes: reactions.filter((r) => r.type === "downvote").length,
-      userReaction: reactions.find((r) => r.user_id === userId)?.type,
-    });
-  }, [reactions, userId]);
+    setLocalReactions(reactions);
+  }, [reactions]);
 
   const handleUpvote = async () => {
-    const result = await toggleReaction(post.id, userId, "upvote");
-    if (result.success) {
-      setReactionState({
-        upvotes: result.upvotes,
-        downvotes: result.downvotes,
-        userReaction: result.userReaction,
-      });
-      // Invalidate the query to refetch fresh data
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const result = await toggleReaction(post.id, userId, "upvote");
+      if (result.success) {
+        setLocalReactions((current) =>
+          current
+            .filter((r) => r.user_id !== userId)
+            .concat(
+              result.userReaction
+                ? [{ type: result.userReaction, user_id: userId }]
+                : [],
+            ),
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDownvote = async () => {
-    const result = await toggleReaction(post.id, userId, "downvote");
-    if (result.success) {
-      setReactionState({
-        upvotes: result.upvotes,
-        downvotes: result.downvotes,
-        userReaction: result.userReaction,
-      });
-      // Invalidate the query to refetch fresh data
-      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const result = await toggleReaction(post.id, userId, "downvote");
+      if (result.success) {
+        setLocalReactions((current) =>
+          current
+            .filter((r) => r.user_id !== userId)
+            .concat(
+              result.userReaction
+                ? [{ type: result.userReaction, user_id: userId }]
+                : [],
+            ),
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -89,10 +97,20 @@ export function PostCard({
 
   const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await addComment(post.id, userId, comment);
-    setComment("");
-    setShowCommentInput(false);
+    if (!comment.trim()) return;
+
+    try {
+      await addComment(post.id, userId, comment);
+      setComment("");
+      setShowCommentInput(false);
+    } catch (error) {
+      console.error("Failed to add comment:", error);
+    }
   };
+
+  const upvotes = localReactions.filter((r) => r.type === "upvote").length;
+  const downvotes = localReactions.filter((r) => r.type === "downvote").length;
+  const userReaction = localReactions.find((r) => r.user_id === userId)?.type;
 
   return (
     <Card className="w-full mx-auto shadow-md">
@@ -153,23 +171,21 @@ export function PostCard({
               variant="outline"
               size="sm"
               onClick={handleUpvote}
-              className={
-                reactionState.userReaction === "upvote" ? "bg-green-100" : ""
-              }
+              disabled={isLoading}
+              className={userReaction === "upvote" ? "bg-green-100" : ""}
             >
               <ThumbsUp className="w-4 h-4 mr-1" />
-              {reactionState.upvotes}
+              {upvotes}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={handleDownvote}
-              className={
-                reactionState.userReaction === "downvote" ? "bg-red-100" : ""
-              }
+              disabled={isLoading}
+              className={userReaction === "downvote" ? "bg-red-100" : ""}
             >
               <ThumbsDown className="w-4 h-4 mr-1" />
-              {reactionState.downvotes}
+              {downvotes}
             </Button>
           </div>
           <Button variant="outline" size="sm" onClick={toggleCommentInput}>
@@ -197,11 +213,12 @@ export function PostCard({
 }
 
 export function CrimesFeed() {
+  const { user } = useAuth();
+
   const reportsQuery = useQuery({
     queryKey: ["reports"],
     queryFn: getCrimeReports,
-    staleTime: 0, // Always fetch fresh data
-    refetchOnWindowFocus: true, // Refetch when window regains focus
+    staleTime: 1000 * 60, // 1 minute
   });
 
   if (reportsQuery.isLoading) return <div>Loading...</div>;
@@ -221,7 +238,7 @@ export function CrimesFeed() {
           key={post.id}
           post={post}
           reactions={post.report_reactions}
-          userId={post.user_id ?? ""}
+          userId={user?.id ?? ""} // Use the current user's ID
         />
       ))}
     </div>
