@@ -11,9 +11,7 @@ export default function FeedLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <TopBar />
-        </header>
+        <TopBar />
         <main className="flex-1 flex flex-col gap-4 p-4 mt-4">{children}</main>
       </SidebarInset>
     </SidebarProvider>

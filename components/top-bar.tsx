@@ -8,7 +8,7 @@ import { BreadcrumbNav } from "./breadcrumb-nav";
 
 export const TopBar = () => {
   return (
-    <div className="w-full flex items-center justify-between gap-2 px-4">
+    <div className="w-full flex items-center justify-between gap-2 px-4 py-2 sticky top-0 bg-background z-10">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="mr-2 h-4" />
@@ -31,7 +31,9 @@ export const TopBar = () => {
                 <Bell className="h-4 w-4 text-primary" />
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm font-medium">New Comment</p>
-                  <p className="text-xs text-muted-foreground">John commented on your post</p>
+                  <p className="text-xs text-muted-foreground">
+                    John commented on your post
+                  </p>
                 </div>
               </div>
 
@@ -39,7 +41,9 @@ export const TopBar = () => {
                 <Bell className="h-4 w-4 text-primary" />
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm font-medium">New Like</p>
-                  <p className="text-xs text-muted-foreground">Sarah liked your post</p>
+                  <p className="text-xs text-muted-foreground">
+                    Sarah liked your post
+                  </p>
                 </div>
               </div>
 
@@ -47,7 +51,9 @@ export const TopBar = () => {
                 <Bell className="h-4 w-4 text-primary" />
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm font-medium">New Follower</p>
-                  <p className="text-xs text-muted-foreground">Mike started following you</p>
+                  <p className="text-xs text-muted-foreground">
+                    Mike started following you
+                  </p>
                 </div>
               </div>
             </div>

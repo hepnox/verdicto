@@ -34,26 +34,41 @@ export default function EditProfile({
         const fileExt = image.name.split(".").pop();
         const fileName = `${profile.id}.${fileExt}`;
 
-        await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(fileName, image, { upsert: true });
 
-        avatar_url = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${fileName}`;
+        if (uploadError) {
+          throw uploadError;
+        }
+
+        const { data } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(fileName);
+
+        avatar_url = data.publicUrl;
       }
 
-      await supabase
+      const { error: updateError } = await supabase
         .from("users")
         .update({
-          ...formData,
+          full_name: formData.full_name,
+          phone: formData.phone,
+          status: formData.status,
           avatar_url,
           updated_at: new Date().toISOString(),
         })
         .eq("id", profile.id);
 
+      if (updateError) {
+        throw updateError;
+      }
+
       onClose();
       window.location.reload();
     } catch (error) {
       console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -94,17 +109,6 @@ export default function EditProfile({
           required
         />
       </div>
-
-      {/* <div className="space-y-2">
-        <Label htmlFor="bio">Bio</Label>
-        <Textarea
-          id="bio"
-          value={formData.status}
-          onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-          rows={3}
-        />
-      </div> */}
-
       <div className="flex justify-end space-x-2">
         <Button type="button" variant="outline" onClick={onClose}>
           Cancel
