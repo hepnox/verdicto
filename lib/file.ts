@@ -18,28 +18,28 @@ export const uploadFileToSupabase = async (
   const filePath = `${path}/${fileName}`;
 
   // Convert File to Buffer for processing
-  const arrayBuffer = await file.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
+  // const arrayBuffer = await file.arrayBuffer();
+  // const buffer = Buffer.from(arrayBuffer);
 
-  let processedBuffer = buffer;
+  // let processedBuffer = buffer;
 
-  // Only process images
-  if (
-    path === "images" &&
-    fileExt &&
-    ["jpg", "jpeg", "png", "webp"].includes(fileExt)
-  ) {
-    processedBuffer = await uploadCompressedImage(
-      buffer,
-      fileExt,
-      quality,
-      watermark,
-    );
-  }
+  // // Only process images
+  // if (
+  //   path === "images" &&
+  //   fileExt &&
+  //   ["jpg", "jpeg", "png", "webp"].includes(fileExt)
+  // ) {
+  //   processedBuffer = await uploadCompressedImage(
+  //     buffer,
+  //     fileExt,
+  //     quality,
+  //     watermark,
+  //   );
+  // }
 
   const uploadedFile = await supabase.storage
     .from(bucket)
-    .upload(filePath, processedBuffer);
+    .upload(filePath, file);
 
   const {
     data: { publicUrl: signedUrl },

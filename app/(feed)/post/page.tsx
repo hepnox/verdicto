@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createReport } from "./action";
 import { useAuth } from "@/hooks/use-auth";
+import { uploadFileToSupabase } from "@/lib/file";
+import { uploadFile } from "@/lib/file.client";
 
 interface BarikoiPlace {
   id: number;
@@ -160,10 +162,12 @@ export default function CreatePostPage() {
           longitude: selectedLocation.longitude,
         };
 
-        // const uploadedImages = await Promise.all(files.map(async (file) => {
-        //   const uploadedImage = await uploadFileToSupabase(file, 'images');
-        //   return uploadedImage.signedUrl;
-        // }));
+        const uploadedImages = await Promise.all(files.map(async (file) => {
+          const uploadedImage = await uploadFile(file, 'images');
+          return uploadedImage.signedUrl;
+        }));
+
+
 
         // Add golocation_id to formData
         const createdReport = await createReport({
@@ -171,7 +175,9 @@ export default function CreatePostPage() {
             ...formData,
           },
           location: geoLocationData,
-          files: files,
+          files: uploadedImages.map((image) => ({
+            url: image,
+          })),
         });
 
         setReport(createdReport.report);

@@ -5,7 +5,7 @@ import { uploadFileToSupabase } from "../../../lib/file";
 export async function createReport(args: {
   data: TablesInsert<"reports">;
   location?: TablesInsert<"geolocations">;
-  files: File[];
+  files: Pick<Tables<"files">, "url">[];
 }) {
   const supabase = await createClient();
   console.log(args)
@@ -38,22 +38,22 @@ export async function createReport(args: {
     .single();
 
   // Download and upload the compressed image without watermark
-  const compressedImages = await Promise.all(
-    args.files.map(async (file) => {
-      const uploadedCompressedImage = await uploadFileToSupabase(
-        file,
-        "images",
-      );
-      return uploadedCompressedImage.signedUrl;
-    }),
-  );
+  // const compressedImages = await Promise.all(
+  //   args.files.map(async (file) => {
+  //     const uploadedCompressedImage = await uploadFileToSupabase(
+  //       file,
+  //       "images",
+  //     );
+  //     return uploadedCompressedImage.signedUrl;
+  //   }),
+  // );
 
   const createdFiles = await supabase
     .from("files")
     .insert(
-      compressedImages.map((image) => ({
+      args.files.map((image) => ({
         id: generateUuid(),
-        url: image,
+        url: image.url,
         user_id: args.data.user_id,
       })),
     )
