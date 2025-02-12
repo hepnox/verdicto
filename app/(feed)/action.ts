@@ -10,7 +10,7 @@ export async function getCrimeReports() {
         report_files(*, files(*)),
         report_reactions(*),
         report_comments(*)
-    `);
+    `).order('created_at', { ascending: false });
     return reports.data ?? [];
 }
 
