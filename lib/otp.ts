@@ -7,7 +7,7 @@ export async function sendSMS(
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `https://app.yfbd.org/api/Users/send/${phoneNumber}?sms=${encodeURIComponent(message)}`,
+      `https://app.yfbd.org/api/otps/send/${phoneNumber}?sms=${encodeURIComponent(message)}`,
       {
         method: "GET",
         headers: {
@@ -33,9 +33,10 @@ export async function generateOTP(phoneNumber: string): Promise<string> {
 
   // Store OTP in database with 5 minute expiry
   const { error } = await supabase.from("otps").insert({
-    phone_number: phoneNumber,
+    phone: phoneNumber,
     code: otp,
     expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    used: false,
   });
 
   if (error) {
@@ -53,21 +54,29 @@ export async function generateOTP(phoneNumber: string): Promise<string> {
   return otp;
 }
 
-export async function verifyOTP(phoneNumber: string, code: string): Promise<boolean> {
+export async function verifyOTP(
+  phoneNumber: string,
+  code: string,
+): Promise<boolean> {
   const { data, error } = await supabase
     .from("otps")
     .select()
-    .eq("phone_number", phoneNumber)
+    .eq("phone", phoneNumber)
     .eq("code", code)
     .gt("expires_at", new Date().toISOString())
+    .is("used", false)
     .single();
 
   if (error || !data) {
     return false;
   }
 
-  // Delete the used OTP
-  await supabase.from("otps").delete().eq("phone_number", phoneNumber).eq("code", code);
+  // Mark OTP as used
+  await supabase
+    .from("otps")
+    .update({ used: true })
+    .eq("phone", phoneNumber)
+    .eq("code", code);
 
   return true;
 }

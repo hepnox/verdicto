@@ -8,8 +8,8 @@ datasource db {
 }
 
 generator supabase {
-  provider = "prisma-supabase"
-  output   = "./../lib/database.types.ts" // Optional: Defaults to ./database.ts which would store in ./prisma/database.ts
+  provider            = "prisma-supabase"
+  output              = "./../lib/database.types.ts" // Optional: Defaults to ./database.ts which would store in ./prisma/database.ts
   enableDocumentation = true // Optional: Defaults to true
 }
 
@@ -29,6 +29,25 @@ enum user_status {
   inactive
   /// User account is permanently blocked
   banned
+}
+
+/// OTP verification records
+model otps {
+  /// Unique identifier for the OTP record
+  id         String   @id @default(uuid()) @db.Uuid
+  /// Phone number the OTP was sent to
+  phone      String
+  /// The OTP code sent to the user
+  code       String
+  /// Whether this OTP has been used
+  used       Boolean  @default(false)
+  /// When this OTP expires
+  expires_at DateTime
+  /// When this OTP was created
+  created_at DateTime @default(now())
+
+  @@index([phone, code])
+  @@index([expires_at])
 }
 
 /// User account information and authentication details
@@ -182,15 +201,15 @@ model files {
 /// Junction table linking reports to files
 model report_files {
   /// Unique identifier for the report-file association
-  id        String  @id @default(uuid()) @db.Uuid
+  id        String @id @default(uuid()) @db.Uuid
   /// Reference to the associated report
-  report_id String  @db.Uuid
+  report_id String @db.Uuid
   /// Reference to the associated file
-  file_id   String  @db.Uuid
+  file_id   String @db.Uuid
 
   // Relations
-  report    reports @relation(fields: [report_id], references: [id], onDelete: Cascade)
-  file      files   @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  report reports @relation(fields: [report_id], references: [id], onDelete: Cascade)
+  file   files   @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   // Indexes
   @@index([report_id])
@@ -200,15 +219,15 @@ model report_files {
 /// Junction table linking comments to files
 model comment_files {
   /// Unique identifier for the comment-file association
-  id         String          @id @default(uuid()) @db.Uuid
+  id         String @id @default(uuid()) @db.Uuid
   /// Reference to the associated comment
-  comment_id String          @db.Uuid
+  comment_id String @db.Uuid
   /// Reference to the associated file
-  file_id    String          @db.Uuid
+  file_id    String @db.Uuid
 
   // Relations
-  comment    report_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade)
-  file       files           @relation(fields: [file_id], references: [id], onDelete: Cascade)
+  comment report_comments @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  file    files           @relation(fields: [file_id], references: [id], onDelete: Cascade)
 
   // Indexes
   @@index([comment_id])
