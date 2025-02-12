@@ -1,4 +1,3 @@
-import { Ollama } from "ollama";
 
 export function createAiClient() {
   return {
@@ -30,11 +29,16 @@ export function createAiClient() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      // For testing purposes
+      console.log('API Request:', { model, prompt, stream });
+
       if (stream) {
         return response.body;
       }
 
-      return response.json();
+      const jsonResponse = await response.json();
+      console.log('API Response:', jsonResponse);
+      return jsonResponse;
     },
   };
 }
@@ -57,7 +61,6 @@ export async function getImageContext(files: File[]) {
     }),
   );
 
-  // Call Llava model to analyze the image
   const response = await ai.generate({
     model: "llava:7b",
     prompt: "Describe this image in detail",
@@ -65,9 +68,25 @@ export async function getImageContext(files: File[]) {
     stream: true,
   });
 
-  for await (const chunk of response) {
-    console.log(chunk);
-  }
+  // if (response) {
+  //   const reader = response.getReader();
+  //   const decoder = new TextDecoder();
+
+  //   try {
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (done) break;
+        
+  //       const chunk = decoder.decode(value);
+  //       console.log('Streaming chunk:', chunk);
+  //     }
+  //   } catch (error) {
+  //     console.error('Streaming error:', error);
+  //     throw error;
+  //   } finally {
+  //     reader.releaseLock();
+  //   }
+  // }
 
   return response;
 }

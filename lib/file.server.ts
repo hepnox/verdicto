@@ -15,7 +15,8 @@ export async function processImageBuffer(
   const compressionOptions = {
     low: { quality: 60 },
     medium: { quality: 80 },
-    high: { quality: 90 }
+    high: { quality: 90 },
+    original: { quality: 100 }
   };
   
   // Add watermark if provided
@@ -38,3 +39,13 @@ export async function processImageBuffer(
     .jpeg(compressionOptions[quality])
     .toBuffer();
 } 
+
+export async function downloadAndCompressImage(url: string, watermark?: string, quality: Enums<'file_quality'> = 'low') {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const fileExt = url.split('.').pop();
+  if (!fileExt) throw new Error('File extension not found');
+  const compressedImage = await processImageBuffer(buffer, fileExt, quality, watermark);
+  return compressedImage;
+}
