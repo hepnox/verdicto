@@ -50,7 +50,7 @@ model users {
   /// URL to user's profile picture
   avatar_url String
   /// FCM token
-  fcm_token String?
+  fcm_token  String?
 
   /// Timestamp when the user account was created
   created_at DateTime @default(now())
@@ -64,11 +64,11 @@ model users {
   files            files[]
   user_preferences user_preferences[]
   notifications    notifications[]
+  notification     notification[]
 
   // Indexes
   @@index([created_at, updated_at])
   @@index([email, phone, password])
-  notification notification[]
 }
 
 /// Incident reports submitted by users
@@ -80,7 +80,7 @@ model reports {
   /// Detailed description of the incident
   description   String   @db.Text
   /// Reference to the location where the incident occurred
-  golocation_id String   @db.Uuid
+  golocation_id String?  @db.Uuid
   /// Date and time when the incident occurred
   incident_at   DateTime
 
@@ -98,7 +98,7 @@ model reports {
   comments      report_comments[]
   reactions     report_reactions[]
   report_files  report_files[]
-  golocation    geolocations       @relation(fields: [golocation_id], references: [id])
+  golocation    geolocations?       @relation(fields: [golocation_id], references: [id])
   notifications notifications[]
 
   // Indexes
@@ -308,15 +308,15 @@ model geolocations {
 /// Simple notification model for user alerts
 model notification {
   /// Unique identifier for the notification
-  id String @id @default(uuid()) @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
   /// User who receives the notification
-  user_id String @db.Uuid
+  user_id    String   @db.Uuid
   /// Notification title
-  title String
+  title      String
   /// Notification message
-  message String
+  message    String
   /// Whether the notification has been read
-  read Boolean @default(false)
+  read       Boolean  @default(false)
   /// When the notification was created
   created_at DateTime @default(now())
 

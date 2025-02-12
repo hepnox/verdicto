@@ -13,7 +13,11 @@ export async function createReport(args: {
   if (!locationId && args.location) {
   const createdLocation = await supabase
     .from("geolocations")
-    .insert(args.location)
+    .insert({
+      latitude: args.location.latitude,
+      longitude: args.location.longitude,
+      created_at: new Date().toISOString(),
+    })
     .select()
     .single();
 

@@ -459,7 +459,7 @@ export type Database = {
           /** Detailed description of the incident */
           description: string;
           /** Reference to the location where the incident occurred */
-          golocation_id: string;
+          golocation_id: string | null;
           /** Unique identifier for the report */
           id: string;
           /** Date and time when the incident occurred */
@@ -478,7 +478,7 @@ export type Database = {
           /** Detailed description of the incident */
           description: string;
           /** Reference to the location where the incident occurred */
-          golocation_id: string;
+          golocation_id?: string | null;
           /** Unique identifier for the report */
           id?: string;
           /** Date and time when the incident occurred */
@@ -497,7 +497,7 @@ export type Database = {
           /** Detailed description of the incident */
           description?: string;
           /** Reference to the location where the incident occurred */
-          golocation_id?: string;
+          golocation_id?: string | null;
           /** Unique identifier for the report */
           id?: string;
           /** Date and time when the incident occurred */
