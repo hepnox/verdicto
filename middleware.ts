@@ -1,24 +1,19 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
-export function middleware(request: NextRequest) {
-  return NextResponse.next();
-  // const username = request.cookies.get('username')
-
-  // if (!username && !request.nextUrl.pathname.startsWith('/login')) {
-  //     return NextResponse.redirect(new URL('/login', request.url))
-  // }
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
 }
 
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+     * - favicon.ico (favicon file)
+     * Feel free to modify this pattern to include more paths.
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-};
+}

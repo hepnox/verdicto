@@ -1,22 +1,35 @@
-import { DropdownMenuItem } from "@radix-ui/react-dropdown-menu";
-import { LogOut } from "lucide-react";
-import { Button } from "./ui/button";
+"use client";
 
-const handleLogout = () => {
-  console.log("Logout");
-  // Implement logout logic
-};
+import { Layout, LogOut, LucideLogOut } from "lucide-react";
+import { Button } from "./ui/button";
+import { useState } from "react";
+import { logout } from "./action";
+import { DropdownMenuItem } from "./ui/dropdown-menu";
 
 export const LogoutMenu = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Button
-      onClick={handleLogout}
-      variant="outline"
-      size="sm"
-      className="border-none w-full flex items-center gap-2 justify-start"
+    <DropdownMenuItem
+      disabled={isLoading}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleLogout();
+      }}
     >
-      <LogOut className="size-4" />
-      Log out
-    </Button>
+      <LucideLogOut />
+      {isLoading ? "Logging out..." : "Log out"}
+    </DropdownMenuItem>
   );
 };
