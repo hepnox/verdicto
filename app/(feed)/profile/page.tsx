@@ -1,17 +1,15 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import ProfileHeader from "./ProfileHeader";
-import ProfileDetails from "./ProfileDetails";
-import CrimeReports from "./CrimeReports";
 import { createClient } from "@/lib/supabase/server";
-import { Tables } from "@/lib/database.types";
+import { redirect } from "next/navigation";
+import CrimeReports from "./CrimeReports";
+import ProfileDetails from "./ProfileDetails";
+import ProfileHeader from "./ProfileHeader";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
   const authUser = await supabase.auth.getUser();
 
   if (!authUser.data.user) {
-    redirect("/auuth/login");
+    redirect("/auth/login");
   }
 
   const profile = (
@@ -23,19 +21,15 @@ export default async function ProfilePage() {
   ).data;
 
   if (!profile) {
-    redirect("/auth/login");
+    redirect("/");
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ProfileHeader profile={profile} />
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-2">
-          <ProfileDetails profile={profile} />
-        </div>
-        <div>
-          <CrimeReports userId={profile.id} />
-        </div>
+      <div className="space-y-8">
+        <ProfileHeader profile={profile} />
+        <ProfileDetails profile={profile} />
+        <CrimeReports userId={profile.id} />
       </div>
     </div>
   );
