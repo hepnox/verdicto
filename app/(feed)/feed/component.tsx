@@ -42,6 +42,13 @@ export function PostCard({
   reactions: Array<{ type: "upvote" | "downvote"; user_id: string }>;
   userId: string;
 }) {
+  // Add function to handle anonymous titles
+  const processTitle = (title: string) => {
+    return title.replace("__anon__:", "");
+  };
+
+  const isAnonymousPost = post.title.startsWith("__anon__:");
+
   const [isLoading, setIsLoading] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
@@ -117,7 +124,7 @@ export function PostCard({
     <Card className="w-full mx-auto shadow-md">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
-          <span>{post.title}</span>
+          <span>{processTitle(post.title)}</span>
           {upvotes > 2 && upvotes > downvotes && (
             <Badge className="ml-2 p-2 text-base bg-green-100 text-green-800">
               <CheckCircle className="size-6 mr-1" />
@@ -157,9 +164,16 @@ export function PostCard({
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">
         <div className="flex justify-between text-sm text-gray-500 w-full">
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-1" />
-            <span>Posted: {format(new Date(post.created_at), "PPp")}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-black">
+              {isAnonymousPost
+                ? "Anonymous"
+                : post.users?.full_name || "Anonymous"}
+            </span>
+            <div className="flex items-center">
+              <Clock className="w-4 h-4 mr-1" />
+              <span>Posted: {format(new Date(post.created_at), "PPp")}</span>
+            </div>
           </div>
           <div className="flex items-center">
             <Clock className="w-4 h-4 mr-1" />

@@ -14,6 +14,7 @@ import { createReport } from "./action";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadFileToSupabase } from "@/lib/file";
 import { uploadFile } from "@/lib/file.client";
+import { Switch } from "@/components/ui/switch";
 
 interface BarikoiPlace {
   id: number;
@@ -36,20 +37,87 @@ export default function CreatePostPage() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedDivision, setSelectedDivision] = useState("");
   const [addressQuery, setAddressQuery] = useState("");
-  const [addressSuggestions, setAddressSuggestions] = useState<BarikoiPlace[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<BarikoiPlace | null>(null);
+  const [addressSuggestions, setAddressSuggestions] = useState<BarikoiPlace[]>(
+    [],
+  );
+  const [selectedLocation, setSelectedLocation] = useState<BarikoiPlace | null>(
+    null,
+  );
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   // Add Bangladesh administrative data
   const bangladeshData = {
-    "Dhaka": ["Dhaka", "Gazipur", "Narayanganj", "Tangail", "Kishoreganj", "Narsingdi", "Faridpur", "Gopalganj", "Madaripur", "Manikganj", "Munshiganj", "Rajbari", "Shariatpur"],
-    "Chittagong": ["Chittagong", "Cox's Bazar", "Bandarban", "Rangamati", "Khagrachari", "Feni", "Lakshmipur", "Comilla", "Noakhali", "Chandpur", "Brahmanbaria"],
-    "Rajshahi": ["Rajshahi", "Natore", "Naogaon", "Chapainawabganj", "Pabna", "Bogra", "Sirajganj", "Joypurhat"],
-    "Khulna": ["Khulna", "Bagerhat", "Satkhira", "Jessore", "Magura", "Jhenaidah", "Narail", "Kushtia", "Chuadanga", "Meherpur"],
-    "Barisal": ["Barisal", "Bhola", "Patuakhali", "Pirojpur", "Jhalokati", "Barguna"],
-    "Sylhet": ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
-    "Rangpur": ["Rangpur", "Gaibandha", "Nilphamari", "Kurigram", "Lalmonirhat", "Dinajpur", "Thakurgaon", "Panchagarh"],
-    "Mymensingh": ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"]
+    Dhaka: [
+      "Dhaka",
+      "Gazipur",
+      "Narayanganj",
+      "Tangail",
+      "Kishoreganj",
+      "Narsingdi",
+      "Faridpur",
+      "Gopalganj",
+      "Madaripur",
+      "Manikganj",
+      "Munshiganj",
+      "Rajbari",
+      "Shariatpur",
+    ],
+    Chittagong: [
+      "Chittagong",
+      "Cox's Bazar",
+      "Bandarban",
+      "Rangamati",
+      "Khagrachari",
+      "Feni",
+      "Lakshmipur",
+      "Comilla",
+      "Noakhali",
+      "Chandpur",
+      "Brahmanbaria",
+    ],
+    Rajshahi: [
+      "Rajshahi",
+      "Natore",
+      "Naogaon",
+      "Chapainawabganj",
+      "Pabna",
+      "Bogra",
+      "Sirajganj",
+      "Joypurhat",
+    ],
+    Khulna: [
+      "Khulna",
+      "Bagerhat",
+      "Satkhira",
+      "Jessore",
+      "Magura",
+      "Jhenaidah",
+      "Narail",
+      "Kushtia",
+      "Chuadanga",
+      "Meherpur",
+    ],
+    Barisal: [
+      "Barisal",
+      "Bhola",
+      "Patuakhali",
+      "Pirojpur",
+      "Jhalokati",
+      "Barguna",
+    ],
+    Sylhet: ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
+    Rangpur: [
+      "Rangpur",
+      "Gaibandha",
+      "Nilphamari",
+      "Kurigram",
+      "Lalmonirhat",
+      "Dinajpur",
+      "Thakurgaon",
+      "Panchagarh",
+    ],
+    Mymensingh: ["Mymensingh", "Jamalpur", "Netrokona", "Sherpur"],
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -71,8 +139,6 @@ export default function CreatePostPage() {
         // }
         // setDescription(aiDescription);
 
-
-
         if (response) {
           const reader = response.getReader();
           const decoder = new TextDecoder();
@@ -84,10 +150,11 @@ export default function CreatePostPage() {
 
               const chunk = decoder.decode(value);
               // Split by newlines since each JSON object is separated by \n
-              const jsonStrings = chunk.split('\n');
+              const jsonStrings = chunk.split("\n");
 
               for (const jsonString of jsonStrings) {
-                if (jsonString.trim()) {  // Only parse non-empty strings
+                if (jsonString.trim()) {
+                  // Only parse non-empty strings
                   try {
                     const json = JSON.parse(jsonString);
                     const chunkRes = json.response;
@@ -101,7 +168,7 @@ export default function CreatePostPage() {
               }
             }
           } catch (error) {
-            console.error('Streaming error:', error);
+            console.error("Streaming error:", error);
             throw error;
           } finally {
             reader.releaseLock();
@@ -109,9 +176,6 @@ export default function CreatePostPage() {
         }
 
         setAiLoading(false);
-
-
-
       } catch (error) {
         console.error("Error getting AI description:", error);
       } finally {
@@ -120,7 +184,9 @@ export default function CreatePostPage() {
     }
   };
 
-  const handleAddressChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAddressChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const query = e.target.value;
     setAddressQuery(query);
     setShowSuggestions(true);
@@ -148,6 +214,11 @@ export default function CreatePostPage() {
         new FormData(e.currentTarget),
       ) as unknown as TablesInsert<"reports">;
 
+      // Modify title if anonymous
+      if (isAnonymous) {
+        formData.title = "__anon__:" + formData.title;
+      }
+
       if (!selectedLocation) {
         alert("Please select a valid address from suggestions");
         return;
@@ -162,12 +233,12 @@ export default function CreatePostPage() {
           longitude: selectedLocation.longitude,
         };
 
-        const uploadedImages = await Promise.all(files.map(async (file) => {
-          const uploadedImage = await uploadFile(file, 'images');
-          return uploadedImage.signedUrl;
-        }));
-
-
+        const uploadedImages = await Promise.all(
+          files.map(async (file) => {
+            const uploadedImage = await uploadFile(file, "images");
+            return uploadedImage.signedUrl;
+          }),
+        );
 
         // Add golocation_id to formData
         const createdReport = await createReport({
@@ -181,6 +252,7 @@ export default function CreatePostPage() {
         });
 
         setReport(createdReport.report);
+        router.push(`/feed`);
       }
     } catch (error) {
       console.error(error);
@@ -200,11 +272,7 @@ export default function CreatePostPage() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="hidden"
-            name="user_id"
-            value={auth.user.id}
-          />
+          <input type="hidden" name="user_id" value={auth.user.id} />
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" name="title" required />
@@ -256,7 +324,9 @@ export default function CreatePostPage() {
               >
                 <option value="">Select District</option>
                 {selectedDivision &&
-                  bangladeshData[selectedDivision as keyof typeof bangladeshData].map((district) => (
+                  bangladeshData[
+                    selectedDivision as keyof typeof bangladeshData
+                  ].map((district) => (
                     <option key={district} value={district}>
                       {district}
                     </option>
@@ -267,14 +337,14 @@ export default function CreatePostPage() {
 
           <div className="relative">
             <Label htmlFor="address">Address</Label>
-            <Input 
-              id="address" 
+            <Input
+              id="address"
               value={addressQuery}
               onChange={handleAddressChange}
               placeholder="Search for an address"
-              required 
+              required
             />
-            
+
             {showSuggestions && !!addressSuggestions?.length && (
               <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg max-h-60 overflow-auto">
                 {addressSuggestions?.map((place) => (
@@ -311,6 +381,15 @@ export default function CreatePostPage() {
               multiple
               accept="image/*,video/*"
               onChange={handleFileChange}
+            />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="anonymous">Post Anonymously</Label>
+            <Switch
+              id="anonymous"
+              checked={isAnonymous}
+              onCheckedChange={setIsAnonymous}
             />
           </div>
 

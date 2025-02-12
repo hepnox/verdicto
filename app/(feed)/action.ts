@@ -10,6 +10,7 @@ export async function getCrimeReports() {
     .select(
       `
         *,
+        users(full_name),
         report_files(*, files(*)),
         report_reactions(type, user_id),
         report_comments(*, users(full_name))
@@ -115,6 +116,11 @@ function generateUuid() {
 
 export async function getReportCount() {
   const supabase = await createClient();
-  const reportCount = (await supabase.from("reports").select("count", {count: 'exact'}).maybeSingle()).count;
+  const reportCount = (
+    await supabase
+      .from("reports")
+      .select("count", { count: "exact" })
+      .maybeSingle()
+  ).count;
   return reportCount;
 }
