@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,31 +23,66 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { toggleReaction, addComment, getCrimeReports } from "../action";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tables } from "@/lib/database.types";
+
+type ReactionState = {
+  upvotes: number;
+  downvotes: number;
+  userReaction: "upvote" | "downvote" | undefined;
+};
 
 export function PostCard({
   post,
-  reactions = [],
+  reactions,
   userId,
 }: {
   post: Awaited<ReturnType<Awaited<typeof getCrimeReports>>>[number];
   reactions: Array<{ type: "upvote" | "downvote"; user_id: string }>;
   userId: string;
 }) {
+  const queryClient = useQueryClient();
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [comment, setComment] = useState("");
+  const [reactionState, setReactionState] = useState<ReactionState>({
+    upvotes: reactions.filter((r) => r.type === "upvote").length,
+    downvotes: reactions.filter((r) => r.type === "downvote").length,
+    userReaction: reactions.find((r) => r.user_id === userId)?.type,
+  });
 
-  const upvotes = reactions.filter((r) => r.type === "upvote").length;
-  const downvotes = reactions.filter((r) => r.type === "downvote").length;
-  const userReaction = reactions.find((r) => r.user_id === userId)?.type;
+  // Update local state when reactions prop changes
+  useEffect(() => {
+    setReactionState({
+      upvotes: reactions.filter((r) => r.type === "upvote").length,
+      downvotes: reactions.filter((r) => r.type === "downvote").length,
+      userReaction: reactions.find((r) => r.user_id === userId)?.type,
+    });
+  }, [reactions, userId]);
 
   const handleUpvote = async () => {
-    await toggleReaction(post.id, userId, "upvote");
+    const result = await toggleReaction(post.id, userId, "upvote");
+    if (result.success) {
+      setReactionState({
+        upvotes: result.upvotes,
+        downvotes: result.downvotes,
+        userReaction: result.userReaction,
+      });
+      // Invalidate the query to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    }
   };
 
   const handleDownvote = async () => {
-    await toggleReaction(post.id, userId, "downvote");
+    const result = await toggleReaction(post.id, userId, "downvote");
+    if (result.success) {
+      setReactionState({
+        upvotes: result.upvotes,
+        downvotes: result.downvotes,
+        userReaction: result.userReaction,
+      });
+      // Invalidate the query to refetch fresh data
+      queryClient.invalidateQueries({ queryKey: ["reports"] });
+    }
   };
 
   const toggleCommentInput = () => setShowCommentInput((prev) => !prev);
@@ -74,9 +109,9 @@ export function PostCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="relative aspect-video">
-          {post.report_files[0].files ? (
+          {post.report_files[0]?.files ? (
             <Image
-              src={post.report_files[0].files.url}
+              src={post.report_files[0]?.files?.url}
               alt={post.title}
               layout="fill"
               objectFit="cover"
@@ -118,19 +153,23 @@ export function PostCard({
               variant="outline"
               size="sm"
               onClick={handleUpvote}
-              className={userReaction === "upvote" ? "bg-green-100" : ""}
+              className={
+                reactionState.userReaction === "upvote" ? "bg-green-100" : ""
+              }
             >
               <ThumbsUp className="w-4 h-4 mr-1" />
-              {upvotes}
+              {reactionState.upvotes}
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={handleDownvote}
-              className={userReaction === "downvote" ? "bg-red-100" : ""}
+              className={
+                reactionState.userReaction === "downvote" ? "bg-red-100" : ""
+              }
             >
               <ThumbsDown className="w-4 h-4 mr-1" />
-              {downvotes}
+              {reactionState.downvotes}
             </Button>
           </div>
           <Button variant="outline" size="sm" onClick={toggleCommentInput}>
@@ -161,6 +200,8 @@ export function CrimesFeed() {
   const reportsQuery = useQuery({
     queryKey: ["reports"],
     queryFn: getCrimeReports,
+    staleTime: 0, // Always fetch fresh data
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   if (reportsQuery.isLoading) return <div>Loading...</div>;
@@ -179,7 +220,7 @@ export function CrimesFeed() {
         <PostCard
           key={post.id}
           post={post}
-          reactions={[]}
+          reactions={post.report_reactions}
           userId={post.user_id ?? ""}
         />
       ))}
