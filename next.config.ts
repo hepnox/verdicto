@@ -13,6 +13,9 @@ const nextConfig: NextConfig = {
       {
         hostname: "picsum.photos",
       },
+      {
+        hostname: "encrypted-tbn0.gstatic.com",
+      },
     ],
   },
 };
