@@ -17,6 +17,8 @@ export default function CreatePostPage() {
   const [loading, setLoading] = useState(false);
   const [description, setDescription] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  const [report, setReport] = useState<TablesInsert<"reports"> | undefined>();
+  const [isStreaming, setIsStreaming] = useState(false);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || []);
