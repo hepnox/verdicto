@@ -7,6 +7,7 @@ export default function FeedLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  return children;
   return (
     <SidebarProvider>
       <AppSidebar />

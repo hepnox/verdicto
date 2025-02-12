@@ -42,3 +42,9 @@ export async function updateReport(args: {
     if (updatedReport.error) throw new Error(updatedReport.error.message);
     return updatedReport.data;
 }
+
+export async function getReports() {
+    const reports = await supabase.from('reports').select('*, files(*)');
+    if (reports.error) throw new Error(reports.error.message);
+    return reports.data;
+}
