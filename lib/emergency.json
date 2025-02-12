@@ -1,5 +1,4 @@
 {
-  "Dhaka": {
     "Police": [
       { "district": "Adabor", "phone": "9133265" },
       { "district": "Airport", "phone": "02-8951281" },
@@ -83,5 +82,4 @@
       { "district": "Medinova Medical Services", "phone": "8113721, 9120288" },
       { "district": "Red Crescent Ambulance", "phone": "9330188-9" }
     ]
-  }
 }
