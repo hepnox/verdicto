@@ -118,9 +118,9 @@ export function PostCard({
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>{post.title}</span>
-          {post.verified && (
-            <Badge variant="secondary" className="ml-2">
-              <CheckCircle className="w-4 h-4 mr-1" />
+          {upvotes > 2 && upvotes > downvotes && (
+            <Badge className="ml-2 p-2 text-base bg-green-100 text-green-800">
+              <CheckCircle className="size-6 mr-1" />
               Verified
             </Badge>
           )}
@@ -206,9 +206,9 @@ export function PostCard({
               maxLength={500}
             />
             <div className="flex justify-end items-center gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => {
                   setShowCommentInput(false);
                   setComment("");
@@ -216,10 +216,7 @@ export function PostCard({
               >
                 Cancel
               </Button>
-              <Button 
-                type="submit"
-                disabled={!comment.trim()}
-              >
+              <Button type="submit" disabled={!comment.trim()}>
                 Post Comment
               </Button>
             </div>
@@ -229,7 +226,9 @@ export function PostCard({
           {post.report_comments?.map((comment) => (
             <div key={comment.id} className="border rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
-                <p className="text-sm font-medium">{comment?.users?.full_name || "Anonymous User"}</p>
+                <p className="text-sm font-medium">
+                  {comment?.users?.full_name || "Anonymous User"}
+                </p>
                 <span className="text-xs text-gray-500">
                   {format(new Date(comment.created_at), "PPp")}
                 </span>
