@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { LogoutMenu } from "./logout-menu";
 
 export function NavUser({
   user,
@@ -87,8 +88,7 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <LogOut />
-              Log out
+              <LogoutMenu />
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
