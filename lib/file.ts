@@ -1,30 +1,30 @@
-import supabase from './supabase';
+import supabase from "./supabase";
 
-const bucket = 'media';
+const bucket = "media";
 
 export const uploadFile = async (
-    file: File,
-    path: 'images' | 'videos'
+  file: File,
+  path: "images" | "videos",
 ): Promise<{ data: any; error: any }> => {
-    try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${path}/${fileName}`;
+  try {
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${path}/${fileName}`;
 
-        const { data, error } = await supabase.storage
-            .from(bucket)
-            .upload(filePath, file);
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file);
 
-        if (error) throw error;
+    if (error) throw error;
 
-        const { data: publicUrl } = supabase.storage
-            .from(bucket)
-            .getPublicUrl(filePath);
+    const { data: publicUrl } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
 
-        return { data: publicUrl, error: null };
-    } catch (error) {
-        return { data: null, error };
-    }
+    return { data: publicUrl, error: null };
+  } catch (error) {
+    return { data: null, error };
+  }
 };
 
 // export const deleteFile = async (

@@ -1,4 +1,10 @@
-export type Json = string | number | boolean | null | {[key: string]: Json | undefined} | Json[]
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[];
 
 export type Database = {
   public: {
@@ -7,706 +13,720 @@ export type Database = {
       comment_files: {
         Row: {
           /** Reference to the associated comment */
-          comment_id: string
+          comment_id: string;
           /** Reference to the associated file */
-          file_id: string
+          file_id: string;
           /** Unique identifier for the comment-file association */
-          id: string
-        }
+          id: string;
+        };
         Insert: {
           /** Reference to the associated comment */
-          comment_id: string
+          comment_id: string;
           /** Reference to the associated file */
-          file_id: string
+          file_id: string;
           /** Unique identifier for the comment-file association */
-          id?: string
-        }
+          id?: string;
+        };
         Update: {
           /** Reference to the associated comment */
-          comment_id?: string
+          comment_id?: string;
           /** Reference to the associated file */
-          file_id?: string
+          file_id?: string;
           /** Unique identifier for the comment-file association */
-          id?: string
-        }
+          id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'comment_filesToreport_comments'
-            columns: ['comment_id']
-            isOneToOne: false
-            referencedRelation: 'report_comments'
-            referencedColumns: ['id']
+            foreignKeyName: "comment_filesToreport_comments";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "report_comments";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'comment_filesTofiles'
-            columns: ['file_id']
-            isOneToOne: false
-            referencedRelation: 'files'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "comment_filesTofiles";
+            columns: ["file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** File metadata for uploaded files */
       files: {
         Row: {
           /** Timestamp when the file was uploaded */
-          created_at: string
+          created_at: string;
           /** Original name of the uploaded file */
-          filename: string
+          filename: string;
           /** Unique identifier for the file */
-          id: string
+          id: string;
           /** MIME type of the file */
-          mime_type: string
+          mime_type: string;
           /** Storage path of the file */
-          path: string
+          path: string;
           /** File size in bytes */
-          size: number
-          user_id: string
-        }
+          size: number;
+          user_id: string;
+        };
         Insert: {
           /** Timestamp when the file was uploaded */
-          created_at?: string
+          created_at?: string;
           /** Original name of the uploaded file */
-          filename: string
+          filename: string;
           /** Unique identifier for the file */
-          id?: string
+          id?: string;
           /** MIME type of the file */
-          mime_type: string
+          mime_type: string;
           /** Storage path of the file */
-          path: string
+          path: string;
           /** File size in bytes */
-          size: number
-          user_id: string
-        }
+          size: number;
+          user_id: string;
+        };
         Update: {
           /** Timestamp when the file was uploaded */
-          created_at?: string
+          created_at?: string;
           /** Original name of the uploaded file */
-          filename?: string
+          filename?: string;
           /** Unique identifier for the file */
-          id?: string
+          id?: string;
           /** MIME type of the file */
-          mime_type?: string
+          mime_type?: string;
           /** Storage path of the file */
-          path?: string
+          path?: string;
           /** File size in bytes */
-          size?: number
-          user_id?: string
-        }
+          size?: number;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'filesTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "filesTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** Geographic locations for incidents */
       geolocations: {
         Row: {
           /** Timestamp when the location was created */
-          created_at: string
+          created_at: string;
           /** Unique identifier for the location */
-          id: string
+          id: string;
           /** Latitude coordinate */
-          latitude: number
+          latitude: number;
           /** Longitude coordinate */
-          longitude: number
-        }
+          longitude: number;
+        };
         Insert: {
           /** Timestamp when the location was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the location */
-          id?: string
+          id?: string;
           /** Latitude coordinate */
-          latitude: number
+          latitude: number;
           /** Longitude coordinate */
-          longitude: number
-        }
+          longitude: number;
+        };
         Update: {
           /** Timestamp when the location was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the location */
-          id?: string
+          id?: string;
           /** Latitude coordinate */
-          latitude?: number
+          latitude?: number;
           /** Longitude coordinate */
-          longitude?: number
-        }
-        Relationships: []
-      }
+          longitude?: number;
+        };
+        Relationships: [];
+      };
       /** User notifications */
       notifications: {
         Row: {
-          comment_id: string | null
+          comment_id: string | null;
           /** Notification content/message */
-          content: string
+          content: string;
           /** Timestamp when the notification was created */
-          created_at: string
+          created_at: string;
           /** Unique identifier for the notification */
-          id: string
+          id: string;
           /** Whether the notification has been read */
-          read: boolean
-          report_id: string | null
+          read: boolean;
+          report_id: string | null;
           /** Notification title */
-          title: string
+          title: string;
           /** Type of notification
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          type: Database['public']['Enums']['notification_type']
-          user_id: string
-        }
+          type: Database["public"]["Enums"]["notification_type"];
+          user_id: string;
+        };
         Insert: {
-          comment_id?: string | null
+          comment_id?: string | null;
           /** Notification content/message */
-          content: string
+          content: string;
           /** Timestamp when the notification was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the notification */
-          id?: string
+          id?: string;
           /** Whether the notification has been read */
-          read?: boolean
-          report_id?: string | null
+          read?: boolean;
+          report_id?: string | null;
           /** Notification title */
-          title: string
+          title: string;
           /** Type of notification
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          type: Database['public']['Enums']['notification_type']
-          user_id: string
-        }
+          type: Database["public"]["Enums"]["notification_type"];
+          user_id: string;
+        };
         Update: {
-          comment_id?: string | null
+          comment_id?: string | null;
           /** Notification content/message */
-          content?: string
+          content?: string;
           /** Timestamp when the notification was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the notification */
-          id?: string
+          id?: string;
           /** Whether the notification has been read */
-          read?: boolean
-          report_id?: string | null
+          read?: boolean;
+          report_id?: string | null;
           /** Notification title */
-          title?: string
+          title?: string;
           /** Type of notification
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          type?: Database['public']['Enums']['notification_type']
-          user_id?: string
-        }
+          type?: Database["public"]["Enums"]["notification_type"];
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'notificationsToreport_comments'
-            columns: ['comment_id']
-            isOneToOne: false
-            referencedRelation: 'report_comments'
-            referencedColumns: ['id']
+            foreignKeyName: "notificationsToreport_comments";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "report_comments";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'notificationsToreports'
-            columns: ['report_id']
-            isOneToOne: false
-            referencedRelation: 'reports'
-            referencedColumns: ['id']
+            foreignKeyName: "notificationsToreports";
+            columns: ["report_id"];
+            isOneToOne: false;
+            referencedRelation: "reports";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'notificationsTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "notificationsTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** Comments on incident reports */
       report_comments: {
         Row: {
           /** Text content of the comment */
-          content: string
+          content: string;
           /** Timestamp when the comment was created */
-          created_at: string
+          created_at: string;
           /** Unique identifier for the comment */
-          id: string
+          id: string;
           /** Reference to the report being commented on */
-          report_id: string
+          report_id: string;
           /** Timestamp when the comment was last updated */
-          updated_at: string
+          updated_at: string;
           /** Reference to the user who created the comment */
-          user_id: string
-        }
+          user_id: string;
+        };
         Insert: {
           /** Text content of the comment */
-          content: string
+          content: string;
           /** Timestamp when the comment was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the comment */
-          id?: string
+          id?: string;
           /** Reference to the report being commented on */
-          report_id: string
+          report_id: string;
           /** Timestamp when the comment was last updated */
-          updated_at: string
+          updated_at: string;
           /** Reference to the user who created the comment */
-          user_id: string
-        }
+          user_id: string;
+        };
         Update: {
           /** Text content of the comment */
-          content?: string
+          content?: string;
           /** Timestamp when the comment was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the comment */
-          id?: string
+          id?: string;
           /** Reference to the report being commented on */
-          report_id?: string
+          report_id?: string;
           /** Timestamp when the comment was last updated */
-          updated_at?: string
+          updated_at?: string;
           /** Reference to the user who created the comment */
-          user_id?: string
-        }
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'report_commentsToreports'
-            columns: ['report_id']
-            isOneToOne: false
-            referencedRelation: 'reports'
-            referencedColumns: ['id']
+            foreignKeyName: "report_commentsToreports";
+            columns: ["report_id"];
+            isOneToOne: false;
+            referencedRelation: "reports";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'report_commentsTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "report_commentsTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** Junction table linking reports to files */
       report_files: {
         Row: {
           /** Reference to the associated file */
-          file_id: string
+          file_id: string;
           /** Unique identifier for the report-file association */
-          id: string
+          id: string;
           /** Reference to the associated report */
-          report_id: string
-        }
+          report_id: string;
+        };
         Insert: {
           /** Reference to the associated file */
-          file_id: string
+          file_id: string;
           /** Unique identifier for the report-file association */
-          id?: string
+          id?: string;
           /** Reference to the associated report */
-          report_id: string
-        }
+          report_id: string;
+        };
         Update: {
           /** Reference to the associated file */
-          file_id?: string
+          file_id?: string;
           /** Unique identifier for the report-file association */
-          id?: string
+          id?: string;
           /** Reference to the associated report */
-          report_id?: string
-        }
+          report_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'filesToreport_files'
-            columns: ['file_id']
-            isOneToOne: false
-            referencedRelation: 'files'
-            referencedColumns: ['id']
+            foreignKeyName: "filesToreport_files";
+            columns: ["file_id"];
+            isOneToOne: false;
+            referencedRelation: "files";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'report_filesToreports'
-            columns: ['report_id']
-            isOneToOne: false
-            referencedRelation: 'reports'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "report_filesToreports";
+            columns: ["report_id"];
+            isOneToOne: false;
+            referencedRelation: "reports";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** User reactions on reports */
       report_reactions: {
         Row: {
           /** Timestamp when the reaction was created */
-          created_at: string
+          created_at: string;
           /** Unique identifier for the reaction */
-          id: string
-          report_id: string
+          id: string;
+          report_id: string;
           /** Type of reaction (upvote/downvote)
            * - upvote: Positive reaction to a report
            * - downvote: Negative reaction to a report
            */
-          type: Database['public']['Enums']['report_reaction_type']
-          user_id: string
-        }
+          type: Database["public"]["Enums"]["report_reaction_type"];
+          user_id: string;
+        };
         Insert: {
           /** Timestamp when the reaction was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the reaction */
-          id?: string
-          report_id: string
+          id?: string;
+          report_id: string;
           /** Type of reaction (upvote/downvote)
            * - upvote: Positive reaction to a report
            * - downvote: Negative reaction to a report
            */
-          type: Database['public']['Enums']['report_reaction_type']
-          user_id: string
-        }
+          type: Database["public"]["Enums"]["report_reaction_type"];
+          user_id: string;
+        };
         Update: {
           /** Timestamp when the reaction was created */
-          created_at?: string
+          created_at?: string;
           /** Unique identifier for the reaction */
-          id?: string
-          report_id?: string
+          id?: string;
+          report_id?: string;
           /** Type of reaction (upvote/downvote)
            * - upvote: Positive reaction to a report
            * - downvote: Negative reaction to a report
            */
-          type?: Database['public']['Enums']['report_reaction_type']
-          user_id?: string
-        }
+          type?: Database["public"]["Enums"]["report_reaction_type"];
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'report_reactionsToreports'
-            columns: ['report_id']
-            isOneToOne: false
-            referencedRelation: 'reports'
-            referencedColumns: ['id']
+            foreignKeyName: "report_reactionsToreports";
+            columns: ["report_id"];
+            isOneToOne: false;
+            referencedRelation: "reports";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'report_reactionsTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "report_reactionsTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** Incident reports submitted by users */
       reports: {
         Row: {
           /** Timestamp when the report was created */
-          created_at: string
+          created_at: string;
           /** Detailed description of the incident */
-          description: string
+          description: string;
           /** Reference to the location where the incident occurred */
-          golocation_id: string
+          golocation_id: string;
           /** Unique identifier for the report */
-          id: string
+          id: string;
           /** Date and time when the incident occurred */
-          incident_at: string
+          incident_at: string;
           /** Title of the incident report */
-          title: string
+          title: string;
           /** Timestamp when the report was last updated */
-          updated_at: string
-          user_id: string
-        }
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
           /** Timestamp when the report was created */
-          created_at?: string
+          created_at?: string;
           /** Detailed description of the incident */
-          description: string
+          description: string;
           /** Reference to the location where the incident occurred */
-          golocation_id: string
+          golocation_id: string;
           /** Unique identifier for the report */
-          id?: string
+          id?: string;
           /** Date and time when the incident occurred */
-          incident_at: string
+          incident_at: string;
           /** Title of the incident report */
-          title: string
+          title: string;
           /** Timestamp when the report was last updated */
-          updated_at: string
-          user_id: string
-        }
+          updated_at: string;
+          user_id: string;
+        };
         Update: {
           /** Timestamp when the report was created */
-          created_at?: string
+          created_at?: string;
           /** Detailed description of the incident */
-          description?: string
+          description?: string;
           /** Reference to the location where the incident occurred */
-          golocation_id?: string
+          golocation_id?: string;
           /** Unique identifier for the report */
-          id?: string
+          id?: string;
           /** Date and time when the incident occurred */
-          incident_at?: string
+          incident_at?: string;
           /** Title of the incident report */
-          title?: string
+          title?: string;
           /** Timestamp when the report was last updated */
-          updated_at?: string
-          user_id?: string
-        }
+          updated_at?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'geolocationsToreports'
-            columns: ['golocation_id']
-            isOneToOne: false
-            referencedRelation: 'geolocations'
-            referencedColumns: ['id']
+            foreignKeyName: "geolocationsToreports";
+            columns: ["golocation_id"];
+            isOneToOne: false;
+            referencedRelation: "geolocations";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: 'reportsTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "reportsTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** User notification preferences */
       user_preferences: {
         Row: {
           /** Unique identifier for the preference settings */
-          id: string
+          id: string;
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          notification_types: Database['public']['Enums']['notification_type']
+          notification_types: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
-          user_id: string
-        }
+          user_id: string;
+        };
         Insert: {
           /** Unique identifier for the preference settings */
-          id?: string
+          id?: string;
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          notification_types: Database['public']['Enums']['notification_type']
+          notification_types: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
-          user_id: string
-        }
+          user_id: string;
+        };
         Update: {
           /** Unique identifier for the preference settings */
-          id?: string
+          id?: string;
           /** Types of notifications the user wants to receive
            * - comment: Notification for new comments
            * - vote: Notification for votes on reports
            * - admin_action: Notification for administrative actions
            */
-          notification_types?: Database['public']['Enums']['notification_type']
+          notification_types?: Database["public"]["Enums"]["notification_type"];
           /** Reference to the user */
-          user_id?: string
-        }
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: 'user_preferencesTousers'
-            columns: ['user_id']
-            isOneToOne: false
-            referencedRelation: 'users'
-            referencedColumns: ['id']
-          }
-        ]
-      }
+            foreignKeyName: "user_preferencesTousers";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       /** User account information and authentication details */
       users: {
         Row: {
           /** URL to user's profile picture */
-          avatar_url: string
+          avatar_url: string;
           /** Timestamp when the user account was created */
-          created_at: string
+          created_at: string;
           /** User's email address, must be unique */
-          email: string
+          email: string;
           /** Unique identifier for the user */
-          id: string
+          id: string;
           /** Hashed password for user authentication */
-          password: string
+          password: string;
           /** User's phone number, must be unique */
-          phone: string
+          phone: string;
           /** User's role in the system
            * - member: Regular user with standard permissions
            * - admin: Administrator with full system access
            */
-          role: Database['public']['Enums']['user_role']
+          role: Database["public"]["Enums"]["user_role"];
           /** Current status of the user account
            * - active: User account is active and can use the system
            * - inactive: User account is temporarily disabled
            * - banned: User account is permanently blocked
            */
-          status: Database['public']['Enums']['user_status']
+          status: Database["public"]["Enums"]["user_status"];
           /** Timestamp when the user account was last updated */
-          updated_at: string
-        }
+          updated_at: string;
+        };
         Insert: {
           /** URL to user's profile picture */
-          avatar_url: string
+          avatar_url: string;
           /** Timestamp when the user account was created */
-          created_at?: string
+          created_at?: string;
           /** User's email address, must be unique */
-          email: string
+          email: string;
           /** Unique identifier for the user */
-          id?: string
+          id?: string;
           /** Hashed password for user authentication */
-          password: string
+          password: string;
           /** User's phone number, must be unique */
-          phone: string
+          phone: string;
           /** User's role in the system
            * - member: Regular user with standard permissions
            * - admin: Administrator with full system access
            */
-          role?: Database['public']['Enums']['user_role']
+          role?: Database["public"]["Enums"]["user_role"];
           /** Current status of the user account
            * - active: User account is active and can use the system
            * - inactive: User account is temporarily disabled
            * - banned: User account is permanently blocked
            */
-          status?: Database['public']['Enums']['user_status']
+          status?: Database["public"]["Enums"]["user_status"];
           /** Timestamp when the user account was last updated */
-          updated_at: string
-        }
+          updated_at: string;
+        };
         Update: {
           /** URL to user's profile picture */
-          avatar_url?: string
+          avatar_url?: string;
           /** Timestamp when the user account was created */
-          created_at?: string
+          created_at?: string;
           /** User's email address, must be unique */
-          email?: string
+          email?: string;
           /** Unique identifier for the user */
-          id?: string
+          id?: string;
           /** Hashed password for user authentication */
-          password?: string
+          password?: string;
           /** User's phone number, must be unique */
-          phone?: string
+          phone?: string;
           /** User's role in the system
            * - member: Regular user with standard permissions
            * - admin: Administrator with full system access
            */
-          role?: Database['public']['Enums']['user_role']
+          role?: Database["public"]["Enums"]["user_role"];
           /** Current status of the user account
            * - active: User account is active and can use the system
            * - inactive: User account is temporarily disabled
            * - banned: User account is permanently blocked
            */
-          status?: Database['public']['Enums']['user_status']
+          status?: Database["public"]["Enums"]["user_status"];
           /** Timestamp when the user account was last updated */
-          updated_at?: string
-        }
-        Relationships: []
-      }
-    }
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+    };
     Views: {
       /* Views are within tables */
-    }
+    };
     Functions: {
       /* No support for functions */
-    }
+    };
     Enums: {
       /** Types of notifications that can be sent to users
        * - comment: Notification for new comments
        * - vote: Notification for votes on reports
        * - admin_action: Notification for administrative actions
        */
-      notification_type: 'comment' | 'vote' | 'admin_action'
+      notification_type: "comment" | "vote" | "admin_action";
       /** Types of reactions that can be made on reports
        * - upvote: Positive reaction to a report
        * - downvote: Negative reaction to a report
        */
-      report_reaction_type: 'upvote' | 'downvote'
+      report_reaction_type: "upvote" | "downvote";
       /** User role enum defining access levels in the system
        * - member: Regular user with standard permissions
        * - admin: Administrator with full system access
        */
-      user_role: 'member' | 'admin'
+      user_role: "member" | "admin";
       /** User account status
        * - active: User account is active and can use the system
        * - inactive: User account is temporarily disabled
        * - banned: User account is permanently blocked
        */
-      user_status: 'active' | 'inactive' | 'banned'
-    }
+      user_status: "active" | "inactive" | "banned";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type PublicSchema = Database[Extract<keyof Database, 'public'>]
+type PublicSchema = Database[Extract<keyof Database, "public">];
 
 export type Tables<
-  PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] & PublicSchema['Views']) | {schema: keyof Database},
-  TableName extends PublicTableNameOrOptions extends {schema: keyof Database}
-    ? keyof (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-        Database[PublicTableNameOrOptions['schema']]['Views'])
-    : never = never
-> = PublicTableNameOrOptions extends {schema: keyof Database}
-  ? (Database[PublicTableNameOrOptions['schema']]['Tables'] &
-      Database[PublicTableNameOrOptions['schema']]['Views'])[TableName] extends {
-      Row: infer R
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R;
     }
     ? R
     : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema['Tables'] & PublicSchema['Views'])
-    ? (PublicSchema['Tables'] & PublicSchema['Views'])[PublicTableNameOrOptions] extends {
-        Row: infer R
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends keyof PublicSchema['Tables'] | {schema: keyof Database},
-  TableName extends PublicTableNameOrOptions extends {schema: keyof Database}
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
-    : never = never
-> = PublicTableNameOrOptions extends {schema: keyof Database}
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Insert: infer I
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I;
     }
     ? I
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Insert: infer I
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends keyof PublicSchema['Tables'] | {schema: keyof Database},
-  TableName extends PublicTableNameOrOptions extends {schema: keyof Database}
-    ? keyof Database[PublicTableNameOrOptions['schema']]['Tables']
-    : never = never
-> = PublicTableNameOrOptions extends {schema: keyof Database}
-  ? Database[PublicTableNameOrOptions['schema']]['Tables'][TableName] extends {
-      Update: infer U
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U;
     }
     ? U
     : never
-  : PublicTableNameOrOptions extends keyof PublicSchema['Tables']
-    ? PublicSchema['Tables'][PublicTableNameOrOptions] extends {
-        Update: infer U
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
-  PublicEnumNameOrOptions extends keyof PublicSchema['Enums'] | {schema: keyof Database},
-  EnumName extends PublicEnumNameOrOptions extends {schema: keyof Database}
-    ? keyof Database[PublicEnumNameOrOptions['schema']]['Enums']
-    : never = never
-> = PublicEnumNameOrOptions extends {schema: keyof Database}
-  ? Database[PublicEnumNameOrOptions['schema']]['Enums'][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema['Enums']
-    ? PublicSchema['Enums'][PublicEnumNameOrOptions]
-    : never
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never;
 
 export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes'] | {schema: keyof Database},
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {schema: keyof Database}
-    ? keyof Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes']
-    : never = never
-> = PublicCompositeTypeNameOrOptions extends {schema: keyof Database}
-  ? Database[PublicCompositeTypeNameOrOptions['schema']]['CompositeTypes'][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema['CompositeTypes']
-    ? PublicSchema['CompositeTypes'][PublicCompositeTypeNameOrOptions]
-    : never
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database;
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never;

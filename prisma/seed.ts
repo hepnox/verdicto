@@ -1,51 +1,53 @@
-import { PrismaClient, UserRole } from '@prisma/client'
-import { faker } from '@faker-js/faker'
+import { PrismaClient, UserRole } from "@prisma/client";
+import { faker } from "@faker-js/faker";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data
-  await prisma.vote.deleteMany()
-  await prisma.comment.deleteMany()
-  await prisma.crimeReport.deleteMany()
-  await prisma.refreshToken.deleteMany()
-  await prisma.user.deleteMany()
+  await prisma.vote.deleteMany();
+  await prisma.comment.deleteMany();
+  await prisma.crimeReport.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.user.deleteMany();
 
   // Create admin user
   const admin = await prisma.user.create({
     data: {
-      email: 'admin@verdicto.com',
-      phoneNumber: '+8801700000000',
-      password: 'hashed_admin_password', // In production, use proper password hashing
+      email: "admin@verdicto.com",
+      phoneNumber: "+8801700000000",
+      password: "hashed_admin_password", // In production, use proper password hashing
       role: UserRole.ADMIN,
       profileImage: faker.image.avatar(),
       bio: faker.person.bio(),
     },
-  })
+  });
 
   // Create some regular users
   const users = await Promise.all(
-    Array(5).fill(null).map(async () => {
-      return prisma.user.create({
-        data: {
-          email: faker.internet.email(),
-          phoneNumber: faker.phone.number({ style: 'international' }),
-          password: 'hashed_password', // In production, use proper password hashing
-          role: UserRole.VERIFIED,
-          profileImage: faker.image.avatar(),
-          bio: faker.person.bio(),
-        },
-      })
-    })
-  )
+    Array(5)
+      .fill(null)
+      .map(async () => {
+        return prisma.user.create({
+          data: {
+            email: faker.internet.email(),
+            phoneNumber: faker.phone.number({ style: "international" }),
+            password: "hashed_password", // In production, use proper password hashing
+            role: UserRole.VERIFIED,
+            profileImage: faker.image.avatar(),
+            bio: faker.person.bio(),
+          },
+        });
+      }),
+  );
 
   // Create crime reports
-  const divisions = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Sylhet']
-  const districts = ['City Center', 'North', 'South', 'East', 'West']
+  const divisions = ["Dhaka", "Chittagong", "Rajshahi", "Khulna", "Sylhet"];
+  const districts = ["City Center", "North", "South", "East", "West"];
 
   for (const user of [...users, admin]) {
-    const numReports = faker.number.int({ min: 1, max: 3 })
-    
+    const numReports = faker.number.int({ min: 1, max: 3 });
+
     for (let i = 0; i < numReports; i++) {
       const report = await prisma.crimeReport.create({
         data: {
@@ -66,10 +68,10 @@ async function main() {
           verificationScore: faker.number.int({ min: -10, max: 50 }),
           authorId: user.id,
         },
-      })
+      });
 
       // Add comments to each report
-      const numComments = faker.number.int({ min: 0, max: 5 })
+      const numComments = faker.number.int({ min: 0, max: 5 });
       for (let j = 0; j < numComments; j++) {
         await prisma.comment.create({
           data: {
@@ -78,7 +80,7 @@ async function main() {
             authorId: faker.helpers.arrayElement(users).id,
             reportId: report.id,
           },
-        })
+        });
       }
 
       // Add votes to each report
@@ -90,20 +92,20 @@ async function main() {
               userId: voter.id,
               reportId: report.id,
             },
-          })
+          });
         }
       }
     }
   }
 
-  console.log('Database has been seeded!')
+  console.log("Database has been seeded!");
 }
 
 main()
   .catch((e) => {
-    console.error(e)
-    process.exit(1)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  }) 
+    await prisma.$disconnect();
+  });

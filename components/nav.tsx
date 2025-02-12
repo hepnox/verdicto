@@ -17,7 +17,7 @@ const Nav = () => {
             <Link
               href="/crimes"
               className={cn(
-                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900",
               )}
             >
               Crimes
@@ -25,7 +25,7 @@ const Nav = () => {
             <Link
               href="/auth/login"
               className={cn(
-                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900",
               )}
             >
               Login
@@ -33,7 +33,7 @@ const Nav = () => {
             <Link
               href="/auth/register"
               className={cn(
-                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900"
+                "inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-900",
               )}
             >
               Register
