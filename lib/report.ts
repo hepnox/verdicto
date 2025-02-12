@@ -1,13 +1,20 @@
+import { getImageContext } from "./ai";
 import { Tables, TablesInsert } from "./database.types";
+import { uploadFile } from "./file";
 import supabase from "./supabase";
 
 export async function createReport(args: {
     data: TablesInsert<'reports'>,
-    files: TablesInsert<'files'>[],
+    files: File[],
 }) {
 
+    const uploadedFiles = await Promise.all(args.files.map(async (file) => {
+        const uploadedFile = await uploadFile(file, 'images');
+        if (uploadedFile.uploadedFile.error) throw new Error(uploadedFile.uploadedFile.error.message);
+        return uploadedFile.signedUrl.data.publicUrl;
+    }));
 
-    const createdFiles = await supabase.from('files').insert(args.files).select();
+    const createdFiles = await supabase.from('files').insert(uploadedFiles.map(url => ({url, user_id: args.data.user_id}))).select();
     if (createdFiles.error) throw new Error(createdFiles.error.message);
     const createdReport = await supabase.from('reports').insert(args.data).select().single();
     if (createdReport.error) throw new Error(createdReport.error.message);
@@ -17,7 +24,15 @@ export async function createReport(args: {
     }));
     const createdReportFiles = await supabase.from('report_files').insert(reportFiles);
     if (createdReportFiles.error) throw new Error(createdReportFiles.error.message);
-    return createdReport.data;
+
+    const imageCtxStream = await getImageContext(args.files);
+
+
+    return {
+        report: createdReport.data,
+        files: createdFiles.data,
+        description: imageCtxStream,
+    }
 }
 
 export async function updateReport(args: {

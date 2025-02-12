@@ -177,14 +177,8 @@ model report_reactions {
 model files {
   /// Unique identifier for the file
   id         String   @id @default(uuid()) @db.Uuid
-  /// Original name of the uploaded file
-  filename   String
-  /// Storage path of the file
-  path       String
-  /// MIME type of the file
-  mime_type  String
-  /// File size in bytes
-  size       Int
+  /// Public URL of the file
+  url        String
   /// Timestamp when the file was uploaded
   created_at DateTime @default(now())
 

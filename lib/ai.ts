@@ -6,25 +6,27 @@ export function createAiClient() {
   });
 }
 
-export async function getImageContext(file: File) {
+export async function getImageContext(files: File[]) {
   const ai = createAiClient();
 
   // Convert file to base64
-  const base64 = await new Promise<string>((resolve) => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
+  const base64s = await Promise.all(files.map(async (file) => {
+    return new Promise<string>((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
       // Remove data URL prefix
       resolve(base64.split(",")[1]);
-    };
-    reader.readAsDataURL(file);
-  });
+      };
+      reader.readAsDataURL(file);
+    });
+  }));
 
   // Call Llava model to analyze the image
   const response = await ai.generate({
     model: "llava",
     prompt: "Describe this image in detail",
-    images: [base64],
+    images: base64s,
     stream: true,
   });
 

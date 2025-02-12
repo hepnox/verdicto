@@ -57,46 +57,28 @@ export type Database = {
         Row: {
           /** Timestamp when the file was uploaded */
           created_at: string;
-          /** Original name of the uploaded file */
-          filename: string;
           /** Unique identifier for the file */
           id: string;
-          /** MIME type of the file */
-          mime_type: string;
-          /** Storage path of the file */
-          path: string;
-          /** File size in bytes */
-          size: number;
+          /** Public URL of the file */
+          url: string;
           user_id: string;
         };
         Insert: {
           /** Timestamp when the file was uploaded */
           created_at?: string;
-          /** Original name of the uploaded file */
-          filename: string;
           /** Unique identifier for the file */
           id?: string;
-          /** MIME type of the file */
-          mime_type: string;
-          /** Storage path of the file */
-          path: string;
-          /** File size in bytes */
-          size: number;
+          /** Public URL of the file */
+          url: string;
           user_id: string;
         };
         Update: {
           /** Timestamp when the file was uploaded */
           created_at?: string;
-          /** Original name of the uploaded file */
-          filename?: string;
           /** Unique identifier for the file */
           id?: string;
-          /** MIME type of the file */
-          mime_type?: string;
-          /** Storage path of the file */
-          path?: string;
-          /** File size in bytes */
-          size?: number;
+          /** Public URL of the file */
+          url?: string;
           user_id?: string;
         };
         Relationships: [
