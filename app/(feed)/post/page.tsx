@@ -50,24 +50,38 @@ export default function CreatePostPage() {
       const formData = Object.fromEntries(
         new FormData(e.currentTarget),
       ) as TablesInsert<"reports">;
-      const fileUrls = await Promise.all(
-        files.map(async (file) => {
-          // Here you would implement file upload logic
-          // Return the URL of the uploaded file
-          return "temp-url";
-        }),
-      );
 
-      //   const report = await createReport({
-      //     data: formData,
-      //     files: fileUrls.map((url) => ({ url })),
-      //   });
+      if (!report) {
+        setIsStreaming(true);
+        const { report, description } = await createReport({
+          data: formData,
+          files: files,
+        });
 
-      //   router.push(`/posts/${report.id}`);
+        setReport(report);
+
+        for await (const desc of description) {
+          setReport((prev) =>
+            !prev
+              ? undefined
+              : {
+                  ...prev,
+                  description: (prev?.description || "") + desc.response,
+                },
+          );
+        }
+      } else {
+        const { report: fullReport } = await createReport({
+          data: formData,
+          files: files,
+        });
+        router.push(`/posts/${fullReport.id}`);
+      }
     } catch (error) {
       console.error(error);
       // Handle error appropriately
     } finally {
+      setIsStreaming(false);
       setLoading(false);
     }
   };

@@ -23,6 +23,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { LogoutMenu } from "./logout-menu";
 
@@ -35,7 +36,7 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  //const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
 
   return (
     <SidebarMenu>
@@ -59,7 +60,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side="top"
+            side={isMobile ? "bottom" : "top"}
             align="end"
             sideOffset={4}
           >
