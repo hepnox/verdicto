@@ -90,3 +90,17 @@ export async function getImageContext(files: File[]) {
 
   return response;
 }
+
+
+export async function getReportComment(json: string) {
+  const ai = createAiClient();
+
+  const response = await ai.generate({
+    images: [],
+    model: "mistral",
+    prompt: `Provide textual markdown  in pretty format summary of the following report data in 100 words: ${json}`,
+    stream: false,
+  });
+
+  return response;
+}

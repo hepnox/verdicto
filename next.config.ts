@@ -18,7 +18,10 @@ const nextConfig: NextConfig = {
       },
       {
         hostname: "cimbxxgcefbtbwxnymhn.supabase.co",
-      }
+      },
+      {
+        hostname: "avatars.githubusercontent.com",
+      },
     ],
   },
 };

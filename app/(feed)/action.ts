@@ -10,6 +10,7 @@ export async function getCrimeReports() {
     .select(
       `
         *,
+        geolocations(*),
         users(full_name),
         report_files(*, files(*)),
         report_reactions(type, user_id),
@@ -113,14 +114,30 @@ export async function addComment(
 function generateUuid() {
   return crypto.randomUUID();
 }
-
 export async function getReportCount() {
   const supabase = await createClient();
-  const reportCount = (
-    await supabase
-      .from("reports")
-      .select("count", { count: "exact" })
-      .maybeSingle()
-  ).count;
-  return reportCount;
+  
+  // Get total reports count
+  const { count: totalReports } = await supabase
+    .from("reports")
+    .select("*", { count: "exact", head: true });
+
+  // Get today's reports count
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const { count: todayReports } = await supabase
+    .from("reports") 
+    .select("*", { count: "exact", head: true })
+    .gte('created_at', today.toISOString());
+
+  // Get total users count
+  const { count: totalUsers } = await supabase
+    .from("users")
+    .select("*", { count: "exact", head: true });
+
+  return {
+    totalReports: totalReports || 0,
+    todayReports: todayReports || 0, 
+    totalUsers: totalUsers || 0
+  };
 }

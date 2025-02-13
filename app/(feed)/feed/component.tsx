@@ -28,6 +28,7 @@ import { toggleReaction, addComment, getCrimeReports } from "../action";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Tables } from "@/lib/database.types";
 import { useAuth } from "@/hooks/use-auth";
+import { processTitle } from "@/helpers/text";
 
 type ReactionState = {
   upvotes: number;
@@ -44,11 +45,6 @@ export function PostCard({
   reactions: Array<{ type: "upvote" | "downvote"; user_id: string }>;
   userId: string;
 }) {
-  // Add function to handle anonymous titles
-  const processTitle = (title: string) => {
-    return title.replace("__anon__:", "");
-  };
-
   const isAnonymousPost = post.title.startsWith("__anon__:");
 
   const [isLoading, setIsLoading] = useState(false);
@@ -172,11 +168,16 @@ export function PostCard({
         </div>
 
         <p className="text-sm text-gray-600">{post.description}</p>
-        {post.golocation_id && (
-          <Badge variant="outline" className="flex items-center">
-            <MapPin className="w-3 h-3 mr-1" />
-            {post.golocation_id}
-          </Badge>
+        {post.geolocations?.latitude && post.geolocations?.longitude && (
+          <div className="w-full h-48 relative rounded-md overflow-hidden">
+            <iframe
+              src={`https://www.google.com/maps/embed/v1/place?key=[API_KEY]&q=${post.geolocations.latitude},${post.geolocations.longitude}`}
+              className="absolute inset-0 w-full h-full border-0"
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
         )}
       </CardContent>
       <CardFooter className="flex flex-col space-y-4">

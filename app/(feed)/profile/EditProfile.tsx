@@ -1,11 +1,13 @@
 "use client";
 import { Tables } from "@/lib/database.types";
-import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { updateProfile } from "./action";
+import { useRouter } from "next/navigation";
+import { uploadFile } from "@/lib/file.client";
 
 export default function EditProfile({
   profile,
@@ -14,6 +16,7 @@ export default function EditProfile({
   profile: Tables<"users">;
   onClose: () => void;
 }) {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     full_name: profile.full_name,
     phone: profile.phone,
@@ -21,51 +24,35 @@ export default function EditProfile({
   });
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState<File | null>(null);
-  const supabase = createClient();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      let avatar_url = profile.avatar_url;
-
+      let avatarUrl;
       if (image) {
-        const fileExt = image.name.split(".").pop();
-        const fileName = `${profile.id}.${fileExt}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from("avatars")
-          .upload(fileName, image, { upsert: true });
-
-        if (uploadError) {
-          throw uploadError;
+        // Validate image type
+        if (!image.type.startsWith("image/")) {
+          throw new Error("Please upload a valid image file");
         }
 
-        const { data } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(fileName);
-
-        avatar_url = data.publicUrl;
+        const { signedUrl } = await uploadFile(image, "images", "original");
+        avatarUrl = signedUrl;
       }
 
-      const { error: updateError } = await supabase
-        .from("users")
-        .update({
-          full_name: formData.full_name,
-          phone: formData.phone,
-          status: formData.status,
-          avatar_url,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", profile.id);
+      const result = await updateProfile({
+        id: profile.id,
+        ...formData,
+        avatarUrl,
+      });
 
-      if (updateError) {
-        throw updateError;
+      if (!result.success) {
+        throw new Error("Failed to update profile");
       }
 
       onClose();
-      window.location.reload();
+      router.refresh();
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");

@@ -1,4 +1,4 @@
-import { Home, Newspaper, User, Map } from "lucide-react";
+import { Home, Newspaper, User, Map, CircuitBoard } from "lucide-react";
 
 export const NavMenus = [
   {
@@ -15,6 +15,11 @@ export const NavMenus = [
     title: "Map",
     url: "/map",
     icon: Map,
+  },
+  {
+    title: "Leaderboard",
+    url: "/leaderboard",
+    icon: CircuitBoard,
   },
   {
     title: "Profile",

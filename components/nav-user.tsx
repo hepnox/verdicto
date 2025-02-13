@@ -29,8 +29,10 @@ import {
 import { LogoutMenu } from "./logout-menu";
 import { useAuth } from "@/hooks/use-auth";
 import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 export function NavUser() {
+  const router = useRouter();
   const { isMobile } = useSidebar();
   const auth = useAuth();
   const user = auth.user;
@@ -82,9 +84,17 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            <DropdownMenuGroup onClick={() => {
+              router.push("/verify");
+            }}>
+              {!auth.user?.user_metadata?.phone_verified && (
+                <DropdownMenuItem>
+                  <BadgeCheck />
+                  Verify
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
-                <BadgeCheck />
+                <UserIcon />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>

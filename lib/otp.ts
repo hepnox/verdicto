@@ -1,13 +1,10 @@
-import { randomInt } from "crypto";
-import supabase from "./supabase";
-
 export async function sendSMS(
   phoneNumber: string,
   message: string,
 ): Promise<boolean> {
   try {
     const response = await fetch(
-      `https://app.yfbd.org/api/otps/send/${phoneNumber}?sms=${encodeURIComponent(message)}`,
+      `https://app.yfbd.org/api/users/send/${phoneNumber.replace("+88", "")}?sms=${encodeURIComponent(message)}`,
       {
         method: "GET",
         headers: {
@@ -29,19 +26,15 @@ export async function sendSMS(
 
 export async function generateOTP(phoneNumber: string): Promise<string> {
   // Generate a 6-digit OTP
-  const otp = randomInt(100000, 999999).toString();
+  const otp = Math.floor(Math.random() * (999999 - 100000 + 1) + 100000).toString();
 
-  // Store OTP in database with 5 minute expiry
-  const { error } = await supabase.from("otps").insert({
-    phone: phoneNumber,
+  // Store OTP data directly
+  const otpData = {
+    phoneNumber,
     code: otp,
-    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-    used: false,
-  });
-
-  if (error) {
-    throw new Error("Failed to store OTP");
-  }
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000).toISOString()
+  };
+  localStorage.setItem('otp', JSON.stringify(otpData));
 
   // Send OTP via SMS
   const message = `Your verification code is: ${otp}`;
@@ -58,25 +51,25 @@ export async function verifyOTP(
   phoneNumber: string,
   code: string,
 ): Promise<boolean> {
-  const { data, error } = await supabase
-    .from("otps")
-    .select()
-    .eq("phone", phoneNumber)
-    .eq("code", code)
-    .gt("expires_at", new Date().toISOString())
-    .is("used", false)
-    .single();
-
-  if (error || !data) {
+  // Get saved OTP from localStorage
+  const savedOTPString = localStorage.getItem('otp');
+  if (!savedOTPString) {
     return false;
   }
 
-  // Mark OTP as used
-  await supabase
-    .from("otps")
-    .update({ used: true })
-    .eq("phone", phoneNumber)
-    .eq("code", code);
+  // Parse stored OTP data
+  const savedOTP = JSON.parse(savedOTPString);
 
-  return true;
+  // Verify OTP matches and hasn't expired
+  if (
+    savedOTP.phoneNumber === phoneNumber &&
+    savedOTP.code === code &&
+    new Date(savedOTP.expiresAt) > new Date()
+  ) {
+    // Clear OTP from storage after successful verification
+    localStorage.removeItem('otp');
+    return true;
+  }
+
+  return false;
 }

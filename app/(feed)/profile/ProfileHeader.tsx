@@ -10,6 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProfileHeader({
   profile,
@@ -24,7 +25,7 @@ export default function ProfileHeader({
         <div className="flex items-center space-x-4">
           <div className="relative">
             <Image
-              src={profile.avatar_url || "/placeholder.svg"}
+              src={profile.avatar_url || "/circle-user.svg"}
               alt="Profile Picture"
               width={120}
               height={120}
@@ -32,10 +33,19 @@ export default function ProfileHeader({
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+            {profile.full_name ? (
+              <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+            ) : (
+              <h1 className="text-2xl italic text-gray-500">NO NAME SET</h1>
+            )}
             <p className="text-gray-600">{profile.email}</p>
             {profile.status && (
-              <p className="text-gray-500 mt-2 max-w-md">{profile.status}</p>
+              <Badge
+                variant="secondary"
+                className="bg-green-100 text-green-600"
+              >
+                {profile.status.toUpperCase()}
+              </Badge>
             )}
           </div>
         </div>
